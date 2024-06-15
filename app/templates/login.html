@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Iniciar Sesión</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/stylelog.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h2>Iniciar Sesión</h2>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="alert alert-danger">
+          {{ messages[0] }}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <form action="/submit_login" method="post"> 
+        <div>
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <div>
+            <label for="password">Contraseña:</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <div>
+            <input type="submit" value="Iniciar Sesión">
+        </div>
+    </form>
+    <a href="/register" class="register-link">¿No tienes una cuenta? Regístrate ahora.</a>
+  </div>
+  <div class="welcome-message">BIENVENIDO A NUESTRA TIENDA</div>
+</body>
+</html>

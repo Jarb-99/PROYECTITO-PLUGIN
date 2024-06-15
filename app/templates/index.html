@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styleIndex.css') }}">
+</head>
+<body>
+    <header class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">Tienda de Plugins</a>
+            <div class="navbar-nav">
+                <a class="nav-link" href="#" onclick="loadContent('Home')">Home</a>
+                <a class="nav-link" href="#" onclick="loadContent('Perfil')">Perfil</a>
+                <a class="nav-link" href="#" onclick="loadContent('Carrito')">Carrito</a>
+                <a class="nav-link" href="#" onclick="loadContent('Soporte')">Soporte</a>
+                <a class="nav-link" href="#" onclick="loadContent('Logout')">Log out</a>
+            </div>
+        </div>
+    </header>
+    <main class="container mt-5">
+        <h1 class="main-header">Bienvenido a la tienda de plugins</h1>
+        <div class="row">
+            <!-- Ejemplo de producto 1 -->
+            <div class="col-md-4">
+                <div class="card mb-4 shadow-sm">
+                    <img src="https://via.placeholder.com/300" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h5 class="card-title">Producto 1</h5>
+                        <p class="card-text">Descripción del producto 1.</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <input type="number" min="1" value="1" class="form-control w-25 mr-2 cantidad">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-primary btn-sm">Ver detalles</button>
+                                <button type="button" class="btn btn-secondary btn-sm add-to-cart" data-name="Producto 1" data-price="24.99">Agregar al carrito</button>
+                            </div>
+                            <small class="text-muted">$24.99</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Ejemplo de producto 2 -->
+            <div class="col-md-4">
+                <div class="card mb-4 shadow-sm">
+                    <img src="https://via.placeholder.com/300" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h5 class="card-title">Producto 2</h5>
+                        <p class="card-text">Descripción del producto 2.</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <input type="number" min="1" value="1" class="form-control w-25 mr-2 cantidad">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-primary btn-sm">Ver detalles</button>
+                                <button type="button" class="btn btn-secondary btn-sm add-to-cart" data-name="Producto 2" data-price="19.99">Agregar al carrito</button>
+                            </div>
+                            <small class="text-muted">$19.99</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Añadir más productos según sea necesario -->
+            
+        </div>
+    </main>
+    <script>
+        function loadContent(page) {
+            window.location.href = '/' + page;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const addToCartButtons = document.querySelectorAll('.add-to-cart');
+
+            addToCartButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const productName = this.getAttribute('data-name');
+                    const productPrice = parseFloat(this.getAttribute('data-price'));
+                    const productQuantity = parseInt(this.parentElement.previousElementSibling.value);
+                    
+                    const product = {
+                        name: productName,
+                        price: productPrice,
+                        quantity: productQuantity
+                    };
+
+                    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+                    cart.push(product);
+                    localStorage.setItem('cart', JSON.stringify(cart));
+
+                    alert('Producto agregado al carrito!');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

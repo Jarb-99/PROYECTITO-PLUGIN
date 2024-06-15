@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Recibo de Compra</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <header class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">Recibo de Compra</a>
+            <div class="navbar-nav">
+                <a class="nav-link" href="#" onclick="loadContent('Home')">Home</a>
+                <a class="nav-link" href="#" onclick="loadContent('Perfil')">Perfil</a>
+                <a class="nav-link" href="#" onclick="loadContent('Carrito')">Carrito</a>
+                <a class="nav-link" href="#" onclick="loadContent('Soporte')">Soporte</a>
+                <a class="nav-link" href="#" onclick="loadContent('Logout')">Logout</a>
+            </div>
+        </div>
+    </header>
+    <main class="container mt-5">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Detalle de la Compra</h5>
+                <p class="card-text">Método de Pago: <strong id="metodoPago"></strong></p>
+                <ul id="listaProductos" class="list-group mb-4"></ul>
+                <h3>Total: $<span id="totalRecibo">0</span></h3>
+            </div>
+        </div>
+    </main>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        function loadContent(page) {
+            window.location.href = '/' + page;
+        }
+
+        function cargarRecibo() {
+            const listaProductos = document.getElementById('listaProductos');
+            const totalRecibo = document.getElementById('totalRecibo');
+            const metodoPagoElement = document.getElementById('metodoPago');
+
+            const recibos = JSON.parse(localStorage.getItem('recibos')) || [];
+            const ultimoRecibo = recibos[recibos.length - 1];
+
+            metodoPagoElement.textContent = ultimoRecibo.metodoPago;
+            totalRecibo.textContent = ultimoRecibo.total;
+
+            ultimoRecibo.productos.forEach(product => {
+                const listItem = document.createElement('li');
+                listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+                listItem.textContent = `${product.name} - ${product.quantity} x $${product.price.toFixed(2)}`;
+                listaProductos.appendChild(listItem);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', cargarRecibo);
+    </script>
+</body>
+</html>

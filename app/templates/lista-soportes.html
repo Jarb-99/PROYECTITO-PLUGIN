@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Soportes</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/stylePerfil.css') }}">
+</head>
+<body>
+    <header class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">Lista de Soportes</a>
+            <div class="navbar-nav">
+                <a class="nav-link" href="#" onclick="loadContent('Home')">Home</a>
+                <a class="nav-link" href="#" onclick="loadContent('Carrito')">Carrito</a>
+                <a class="nav-link" href="#" onclick="loadContent('Soporte')">Soporte</a>
+                <a class="nav-link" href="#" onclick="loadContent('Logout')">Logout</a>
+            </div>
+        </div>
+        <div class="sidebar">
+            <a href="#" onclick="loadContent('Perfil')">Perfil</a>
+            <a href="#" onclick="loadContent('PComprados')">Productos Comprados</a>
+            <a href="#" onclick="loadContent('LRecibos')">Recibos</a>
+        </div>
+    </header>
+    <main class="container mt-5">
+        <div class="list-group mt-4" id="soportesList">
+            <!-- Los elementos de soporte serán añadidos aquí -->
+        </div>
+    </main>
+    <script>
+        function loadContent(page) {
+            window.location.href = '/' + page;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const soportesList = document.getElementById('soportesList');
+            const soportes = JSON.parse(localStorage.getItem('soportes')) || [];
+
+            soportes.forEach(soporte => {
+                const soporteItem = document.createElement('div');
+                soporteItem.classList.add('list-group-item');
+                soporteItem.innerHTML = `
+                    <h5 class="mb-1">Soporte</h5>
+                    <p class="mb-1">${soporte.mensaje}</p>
+                    <small class="text-muted">Fecha del soporte: ${soporte.fecha}</small>
+                `;
+                soportesList.appendChild(soporteItem);
+            });
+        });
+    </script>
+</body>
+</html>

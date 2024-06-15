@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Productos Comprados</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/stylePerfil.css') }}">
+</head>
+<body>
+    <header class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">Productos Comprados</a>
+            <div class="navbar-nav">
+                <a class="nav-link" href="#" onclick="loadContent('Home')">Home</a>
+                <a class="nav-link" href="#" onclick="loadContent('Carrito')">Carrito</a>
+                <a class="nav-link" href="#" onclick="loadContent('Soporte')">Soporte</a>
+                <a class="nav-link" href="#" onclick="loadContent('Logout')">Logout</a>
+            </div>
+        </div>
+        <div class="sidebar">
+            <a href="#" onclick="loadContent('Perfil')">Perfil</a>
+            <a href="#" onclick="loadContent('LSoportes')">Soportes</a>
+            <a href="#" onclick="loadContent('LRecibos')">Recibos</a>
+        </div>
+    </header>
+    <main class="container mt-5">
+        <div class="list-group mt-4" id="listaProductosComprados"></div>
+    </main>
+    <script>
+        function loadContent(page) {
+            window.location.href = '/' + page;
+        }
+
+        function cargarProductosComprados() {
+            const listaProductosComprados = document.getElementById('listaProductosComprados');
+            const productosComprados = JSON.parse(localStorage.getItem('productosComprados')) || [];
+
+            productosComprados.forEach(producto => {
+                const listItem = document.createElement('div');
+                listItem.className = 'list-group-item';
+                listItem.innerHTML = `
+                    <h5 class="mb-1">${producto.name}</h5>
+                    <p class="mb-1">Cantidad: ${producto.quantity}</p>
+                    <p class="mb-1">Precio(u): $${producto.price.toFixed(2)}</p>
+                    <small class="text-muted">Fecha de compra: ${producto.fecha}</small>
+                `;
+                listaProductosComprados.appendChild(listItem);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', cargarProductosComprados);
+    </script>
+</body>
+</html>

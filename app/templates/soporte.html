@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Soporte</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <header class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">Crear Soporte</a>
+            <div class="navbar-nav">
+                <a class="nav-link" href="#" onclick="loadContent('Home')">Home</a>
+                <a class="nav-link" href="#" onclick="loadContent('Perfil')">Perfil</a>
+                <a class="nav-link" href="#" onclick="loadContent('Carrito')">Carrito</a>
+                <a class="nav-link" href="#" onclick="loadContent('LSoportes')">Lista de Soportes</a>
+                <a class="nav-link" href="#" onclick="loadContent('Logout')">Logout</a>
+            </div>
+        </div>
+    </header>
+    <div class="container mt-4">
+        <section id="crearSoporte">
+            <div id="alert-success" class="alert alert-success" role="alert" style="display:none;">
+                ¡Soporte enviado exitosamente!
+            </div>
+            <form id="soporteForm">
+                <div class="form-group">
+                    <label for="mensaje">Mensaje:</label>
+                    <textarea id="mensaje" name="mensaje" class="form-control" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Enviar</button>
+            </form>
+        </section>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        function loadContent(page) {
+            window.location.href = '/' + page;
+        }
+
+        document.getElementById('soporteForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const mensaje = document.getElementById('mensaje').value;
+            const soportes = JSON.parse(localStorage.getItem('soportes')) || [];
+            const newSoporte = {
+                mensaje: mensaje,
+                fecha: new Date().toISOString().split('T')[0] // Fecha actual
+            };
+            soportes.push(newSoporte);
+            localStorage.setItem('soportes', JSON.stringify(soportes));
+            
+            // Mostrar mensaje de éxito
+            const alertSuccess = document.getElementById('alert-success');
+            alertSuccess.style.display = 'block';
+
+            // Limpiar formulario
+            document.getElementById('soporteForm').reset();
+            
+        });
+    </script>
+</body>
+</html>

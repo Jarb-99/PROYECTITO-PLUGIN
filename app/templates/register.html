@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Regístrate</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+      body {
+          background-color: #9E4242;
+          font-family: Arial, sans-serif;
+          margin: 0;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          height: 100vh;
+      }
+
+      h2 {
+          font-size: 10vw;
+          margin-bottom: 20px;
+          text-align: center;
+      }
+
+      form {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          width: 100%;
+          margin-top: 20px; 
+      }
+
+      label {
+          margin-top: 10px;
+          text-align: center;
+      }
+
+      input {
+          margin-top: 5px;
+          padding: 10px;
+          border: 2px solid #715B5B;
+          border-radius: 10px;
+          width: 100%;
+          box-sizing: border-box;
+      }
+
+      input[type="submit"] {
+          margin-top: 20px;
+          padding: 10px;
+          border: 2px solid #715B5B; 
+          border-radius: 10px;
+          cursor: pointer;
+          background-color: #715B5B; 
+          color: white;
+          width: 100%;
+      }
+
+      input[type="submit"]:hover {
+          background-color: #B09696; 
+      }
+
+      .login-link {
+          margin-top: 30px; 
+          cursor: pointer;
+          text-align: center;
+          color: #131212;
+      }
+
+      .login-link:hover {
+          text-decoration: underline;
+          color: blue;
+      }
+  </style>
+
+</head>
+<body>
+    <h2>Regístrate</h2>
+    <a href="/" class="login-link">¿Ya tienes una cuenta? Inicia Sesión</a>
+    <form action="/submit_register" method="post">
+        <div>
+            <label for="nombre">Nombre:</label>
+            <input type="text" id="nombre" name="nombre" required>
+        </div>
+        <div>
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <div>
+            <label for="password">Contraseña:</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <div>
+            <input type="submit" value="Registrarse">
+        </div>
+    </form>
+   
+</body>
+</html>

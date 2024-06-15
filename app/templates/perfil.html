@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Perfil</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/stylePerfil.css') }}">
+</head>
+<body>
+    <header class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">Perfil</a>
+            <div class="navbar-nav">
+                <a class="nav-link" href="#" onclick="loadContent('Home')">Home</a>
+                <a class="nav-link" href="#" onclick="loadContent('Carrito')">Carrito</a>
+                <a class="nav-link" href="#" onclick="loadContent('Soporte')">Soporte</a>
+                <a class="nav-link" href="#" onclick="loadContent('Logout')">Logout</a>
+            </div>
+        </div>
+        <div class="sidebar">
+            <a href="#" onclick="loadContent('PComprados')">Productos Comprados</a>
+            <a href="#" onclick="loadContent('LSoportes')">Soportes</a>
+            <a href="#" onclick="loadContent('LRecibos')">Recibos</a>
+        </div>
+    </header>
+    <div class="content">
+        <main class="container mt-5">
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Información Personal</h5>
+                            <p class="card-text">Nombre: Juan Pérez</p>
+                            <p class="card-text">Correo electrónico: juanperez@example.com</p>
+                            <p class="card-text">Teléfono: +1234567890</p>
+                            <a href="#" class="btn btn-primary">Editar Perfil</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Historial de Compras</h5>
+                            <ul class="list-group">
+                                <li class="list-group-item">Producto 1 - $24.99</li>
+                                <li class="list-group-item">Producto 2 - $19.99</li>
+                                <li class="list-group-item">Producto 3 - $29.99</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script>
+        function loadContent(page) {
+            window.location.href = '/' + page;
+        }
+    </script>
+</body>
+</html>
