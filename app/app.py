@@ -1,23 +1,81 @@
 # -*- coding: utf-8 -*-
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash 
+from flask import session as sessionF
 from connection import get_cassandra_session
 from ScriptsCQL import createTables, deleteTables, insert
+from uuid import uuid4
+from datetime import datetime, date
 
 app = Flask(__name__)
+app.secret_key = 'secret_key'
 session = get_cassandra_session()
 
 # true/ false para activar la creacion de tablas en la base de datos
 # true = puede tardar un 1 minuto la cracion de las tablas   
-boolTables = True
+boolTables = False
 if boolTables:
   deleteTables.deleteTables()
   createTables.createTables()
   insert.insertDatas()  
-
+  
 # Views/Urls
 @app.route('/')
-def login():
+def index():
   return render_template('index.html')
+
+@app.route('/login', methods=['GET','POST'])
+def login():
+  if request.method == 'POST':
+    correo = request.form['email']
+    contrasena = request.form['password']
+    
+    usuario = session.execute("""
+      SELECT * FROM usuario 
+      WHERE correo=%s AND contrasena=%s ALLOW FILTERING
+      """, ( correo, contrasena )).one()
+
+    if usuario:
+      if usuario.contrasena == contrasena:
+        sessionF['id'] = usuario.usuario_id
+        sessionF['nombre'] = usuario.nombre
+        sessionF['email'] = correo
+
+        return redirect(url_for('index'))
+      else:
+        flash('Contraseña incorrecta', 'error')
+        return redirect('/login')
+    else:
+      flash('Usuario no registrado', 'error')
+      return redirect('/register')
+      
+  return render_template('login.html')
+
+@app.route('/register', methods=['GET','POST'])
+def register():
+  if request.method == 'POST':
+    nombre = request.form['nombre']
+    apellido = request.form['apellido']
+    correo = request.form['email']
+    contrasena = request.form['password']
+    
+    usuario = session.execute("""
+      SELECT * FROM usuario 
+      WHERE correo=%s AND contrasena=%s ALLOW FILTERING
+      """, ( correo, contrasena )).one()
+
+    if usuario:
+      flash('Ya existe el usuario', 'error')
+      return redirect('/login')
+    
+    else:
+      session.execute("""
+            INSERT INTO USUARIO (usuario_id, nombre, apellido, correo, contrasena, fecha_rgstro, foto, direccion, telefono)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, 
+        (uuid4(), nombre, apellido, correo, contrasena, datetime.now().date(), '', '', ''))
+      
+      return redirect(url_for('index'))
+  return render_template('register.html')
 
 @app.route('/Home')
 def home():
@@ -57,43 +115,6 @@ def recibo():
     # Aquí puedes procesar más información para el recibo si es necesario
     return render_template('recibo.html', metodoPago=metodo_pago)
 
-"""
-@app.route('/pagina_principal')
-def pagina_principal():
-  peliculas = twoten_movies()
-  return render_template('index.html')
-"""
-
-"""
-@app.route('/submit_register', methods=['POST'])
-def submit_register():
-  nombre = request.form['nombre']
-  email = request.form['email']
-  contraseña = request.form['password']
-  insert_user(nombre, email, contraseña)
-  return redirect(url_for('pagina_principal'))
-
-
-@app.route('/submit_login', methods=['POST'])
-def submit_login():
-  email = request.form['email']
-  contraseña = request.form['password']
-  id_user = get_user_id(email)
-  print(id_user)
-  if id_user:
-    if verify_password(id_user['id'], contraseña):
-      session['logged'] = True
-      session['id'] = id_user['id']
-      session['usuario'] = id_user['usuario']
-      session['email'] = email
-      return redirect(url_for('pagina_principal'))
-    else:
-      flash('Contraseña incorrecta', 'error')
-      return redirect('/')
-  else:
-    flash('Usuario no registrado', 'error')
-    return redirect('/')
-"""
 
 @app.route('/Producto')
 def todas_peliculas():

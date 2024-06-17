@@ -2,7 +2,6 @@ from UDTs import *
 from uuid import uuid4
 from datetime import datetime, date
 from connection import get_cassandra_session
-from cassandra.util import OrderedMap
 
 def insertDatas():
     session = get_cassandra_session()
