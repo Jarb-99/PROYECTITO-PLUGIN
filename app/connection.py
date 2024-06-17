@@ -1,18 +1,9 @@
 from cassandra.cluster import Cluster
+keyspace = 'DataBaseProject'
 
 # Conectar
-cluster = Cluster(['127.0.0.1'])
-session = cluster.connect('bd_prueba')#nombre de la base de datos
-
-try:
-    # make query
-    query = "SELECT nombre, edad, direccion FROM alumno"
-    rows = session.execute(query)
-
-    # print
-    for row in rows:
-        #print('Nombre: {}, Edad: {}, Direccion: {}'.format(row.nombre, row.edad, row.direccion))
-        print(f'Nombre: {row.nombre}, Edad: {row.edad}, Direccion: {row.direccion}')
-
-finally:
-    cluster.shutdown()
+def get_cassandra_session():
+    # Conectar
+    cluster = Cluster(['localhost'])
+    session = cluster.connect(keyspace)  # nombre de la base de datos
+    return session

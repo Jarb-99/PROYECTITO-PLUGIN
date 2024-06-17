@@ -1,15 +1,20 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+# -*- coding: utf-8 -*-
+from flask import Flask, render_template, request, redirect, url_for, flash
+from connection import get_cassandra_session
+from ScriptsCQL import createTables, deleteTables, insert
 
 app = Flask(__name__)
+session = get_cassandra_session()
 
-"""
-app.secret_key = 'clave_secreta'
+# true/ false para activar la creacion de tablas en la base de datos
+# true = puede tardar un 1 minuto la cracion de las tablas   
+boolTables = True
+if boolTables:
+  deleteTables.deleteTables()
+  createTables.createTables()
+  insert.insertDatas()  
 
-@app.route('/')
-def login():
-  return render_template('login.html')
-"""
-
+# Views/Urls
 @app.route('/')
 def login():
   return render_template('index.html')
@@ -97,4 +102,4 @@ def todas_peliculas():
 
 
 if __name__ == '__main__':
-  app.run(host='0.0.0.0', port=8080, debug=True)
+  app.run(host='localhost', port=8080, debug=True)
