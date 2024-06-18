@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Recibo de Compra</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styleRecibo.css') }}">
 </head>
 <body>
     <header class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -14,9 +14,20 @@
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title">Detalle de la Compra</h5>
-                <p class="card-text">Método de Pago: <strong id="metodoPago"></strong></p>
-                <ul id="listaProductos" class="list-group mb-4"></ul>
-                <h3>Total: $<span id="totalRecibo">0</span></h3>
+                <p class="card-text">Fecha: <strong>{{ recibo.fecha }}</strong></p>
+                <p class="card-text">Método de Pago: <strong>{{ recibo.metodo.nombre }}: {{ recibo.metodo.descripcion }}</strong></p>
+                <ul class="list-group mb-4">
+                    {% for producto in recibo.productos %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="my-0">{{ producto.nombre }}</h6>
+                            <small class="text-muted">Cantidad: {{ producto.cantidad }}</small>
+                        </div>
+                        <span class="text-muted">${{ producto.precio }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <h3>Total: $<span>{{ recibo.monto }}</span></h3>
             </div>
         </div>
     </main>

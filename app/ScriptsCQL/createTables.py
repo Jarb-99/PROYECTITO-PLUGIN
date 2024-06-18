@@ -70,9 +70,9 @@ def createTables():
     CREATE TABLE IF NOT EXISTS SOPORTE (
         usuario_id UUID,
         soporte_id UUID,
-        fecha DATE,
+        fecha TIMESTAMP,
         mensaje TEXT,
-        respuestas MAP<DATE, FROZEN<RESPUESTA>>,
+        respuestas MAP<TIMESTAMP, FROZEN<RESPUESTA>>,
         PRIMARY KEY (usuario_id, soporte_id, fecha)
     );
     """)

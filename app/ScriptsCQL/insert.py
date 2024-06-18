@@ -45,9 +45,9 @@ def insertDatas():
 
     session.user_type_registered(keyspace, 'respuesta', Respuesta)
     soportes = [
-        (usuario1_id, soporte1_id, date(2023, 1, 1), 'Mensaje de soporte 1', {date(2023, 1, 1): Respuesta(propietario1_id, 'Respuesta 1', 'juan.perez')}),
-        (usuario2_id, soporte2_id, date(2023, 1, 2), 'Mensaje de soporte 2', {date(2023, 1, 2): Respuesta(propietario1_id, 'Respuesta 2', 'juan.perez')}),
-        (usuario3_id, soporte3_id, date(2023, 1, 3), 'Mensaje de soporte 3', {date(2023, 1, 3): Respuesta(usuario3_id, 'Respuesta 3', 'pedro')})
+        (usuario1_id, soporte1_id, datetime(2023, 1, 1), 'Mensaje de soporte 1', {datetime(2023, 1, 1): Respuesta(propietario1_id, 'Respuesta 1', 'juan.perez')}),
+        (usuario2_id, soporte2_id, datetime(2023, 1, 2), 'Mensaje de soporte 2', {datetime(2023, 1, 2): Respuesta(propietario1_id, 'Respuesta 2', 'juan.perez')}),
+        (usuario3_id, soporte3_id, datetime(2023, 1, 3), 'Mensaje de soporte 3', {datetime(2023, 1, 3): Respuesta(usuario3_id, 'Respuesta 3', 'pedro')})
     ]
 
     session.user_type_registered(keyspace, 'plugin', Plugin)

@@ -32,6 +32,10 @@ lista_productos = [producto._asdict() for producto in productos]
 #############################################
 # Views/Urls
 @app.route('/')
+def start():
+	return render_template('login.html')
+
+@app.route('/index')
 def index():
 	  
 	return render_template('index.html', usuario=sessionF, productos=lista_productos)
@@ -81,7 +85,8 @@ def register():
 		else:
 			usuario_id = uuid4()
 			carrito_id = uuid4()
-			date = datetime.now().date()
+			datestamp = datetime.now()
+			date = datestamp.date()
 
 			SM.set_usuario(sessionF, usuario_id, carrito_id, nombre, apellido, correo, contrasena, date.strftime("%Y-%m-%d"), '', '', '')
 
@@ -95,7 +100,7 @@ def register():
 			session.execute("""
 				INSERT INTO CARRITO (usuario_id, carrito_id, fecha, monto, productos)
 				VALUES (%s, %s, %s, %s, %s)
-			""", (usuario_id, carrito_id, date, 0, {}))
+			""", (usuario_id, carrito_id, datestamp, 0, {}))
 			
 			return redirect(url_for('index'))
 	return render_template('register.html')
@@ -207,11 +212,12 @@ def pagar_carrito():
     if request.method == 'POST':
         metodo_pago = request.form.get('metodoPago')
         correo = request.form.get('correo')
-        date = datetime.now().date()
+        datestamp = datetime.now()
         
         pago_id = uuid4()
         recibo_id = uuid4()
         carrito_id = uuid4()
+        print(carrito_id)
         
         carrito = session.execute("""
 			SELECT * FROM carrito 
@@ -225,23 +231,28 @@ def pagar_carrito():
             INSERT INTO PAGO (usuario_id, pago_id, carrito_id, fecha, monto, metodo)
             VALUES (%s, %s, %s, %s, %s, %s)
         """, 
-        (carrito.usuario_id, pago_id, carrito.carrito_id, date, carrito.monto, Metodo_pago(metodo_pago,correo)))
+        (carrito.usuario_id, pago_id, carrito.carrito_id, datestamp, carrito.monto, Metodo_pago(metodo_pago,correo)))
         
         lista_productos = {Prdcto_anddo(producto.producto_id, producto.nombre, producto.precio, producto.monto, producto.cantidad) for producto in carrito.productos}
         
         session.execute("""
             INSERT INTO RECIBO (usuario_id, recibo_id, carrito_id, pago_id, fecha, monto, metodo, productos)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-        """, (carrito.usuario_id, recibo_id, carrito.carrito_id, pago_id, date, carrito.monto, Metodo_pago(metodo_pago,correo), lista_productos))
+        """, (carrito.usuario_id, recibo_id, carrito.carrito_id, pago_id, datestamp, carrito.monto, Metodo_pago(metodo_pago,correo), lista_productos))
         
         
         session.execute("""
 			INSERT INTO CARRITO (usuario_id, carrito_id, fecha, monto, productos)
 			VALUES (%s, %s, %s, %s, %s)
-			""", (carrito.usuario_id, carrito_id, date, 0, {}))
-
+			""", (carrito.usuario_id, carrito_id, datestamp, 0, {}))
+        
         SM.set(sessionF, 'carrito_id', carrito_id)
-
+        session.execute("""
+			UPDATE USUARIO
+   			SET carrito_id=%s
+			WHERE usuario_id=%s
+			""", (carrito_id, carrito.usuario_id))
+        
     return redirect(url_for('recibo'))
 
 @app.route('/Soporte')
@@ -265,7 +276,8 @@ def LSoportes():
 def LRecibos():
     recibos = session.execute("""
 		SELECT * FROM recibo
-		WHERE usuario_id=%s ALLOW FILTERING
+		WHERE usuario_id=%s 
+  		ORDER BY fecha DESC
 		""", (sessionF['usuario_id'], ))
     
     lista_recibos = [recibo._asdict() for recibo in recibos]
@@ -282,7 +294,7 @@ def recibo():
 		ORDER BY fecha DESC 
 		LIMIT 1
 	""", (sessionF['usuario_id'], )).one()
-    
+    print(recibo_reciente)
     return render_template('recibo.html', usuario=sessionF, recibo=recibo_reciente)
 
 
