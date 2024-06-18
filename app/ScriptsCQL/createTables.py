@@ -116,16 +116,17 @@ def createTables():
     """)
 
     session.execute("""
-    CREATE TABLE IF NOT EXISTS RECIBO (
-        usuario_id UUID,
-        recibo_id UUID,
-        carrito_id UUID,
-        pago_id UUID,
-        fecha TIMESTAMP,
-        monto DECIMAL,
-        metodo FROZEN<METODO_PAGO>,
-        PRIMARY KEY (usuario_id, recibo_id, carrito_id, pago_id, fecha)
-    );
+        CREATE TABLE IF NOT EXISTS RECIBO (
+            usuario_id UUID,
+            recibo_id UUID,
+            carrito_id UUID,
+            pago_id UUID,
+            fecha TIMESTAMP,
+            monto DECIMAL,
+            metodo FROZEN<METODO_PAGO>,
+            productos SET<FROZEN<PRDCTO_ANDDO>>,
+            PRIMARY KEY ((usuario_id), fecha, monto, recibo_id, carrito_id, pago_id)
+        ) WITH CLUSTERING ORDER BY (fecha DESC, monto ASC, recibo_id ASC);
     """)
 
     session.execute("""
@@ -133,6 +134,8 @@ def createTables():
         usuario_id UUID,
         producto_id UUID,
         fecha TIMESTAMP,
+        nombre TEXT,
+        precio DECIMAL,
         cantidad INT,
         PRIMARY KEY (usuario_id, producto_id, fecha)
     );

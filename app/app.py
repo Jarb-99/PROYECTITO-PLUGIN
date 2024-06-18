@@ -16,7 +16,7 @@ session = get_cassandra_session()
 #############################################
 # true/ false para activar la creacion de tablas en la base de datos
 # true = puede tardar un 1 minuto la cracion de las tablas   
-boolTables = True
+boolTables = False
 if boolTables:
 	deleteTables.deleteTables()
 	createTables.createTables()
@@ -202,6 +202,48 @@ def eliminar_producto_carrito():
     
     return redirect(url_for('carrito'))
 
+@app.route('/Carrito/pag', methods=['POST'])
+def pagar_carrito():
+    if request.method == 'POST':
+        metodo_pago = request.form.get('metodoPago')
+        correo = request.form.get('correo')
+        date = datetime.now().date()
+        
+        pago_id = uuid4()
+        recibo_id = uuid4()
+        carrito_id = uuid4()
+        
+        carrito = session.execute("""
+			SELECT * FROM carrito 
+			WHERE carrito_id=%s ALLOW FILTERING
+			""", (sessionF['carrito_id'],)).one()
+        
+        session.user_type_registered(keyspace, 'prdcto_anddo', Prdcto_anddo)
+        session.user_type_registered(keyspace, 'metodo_pago', Metodo_pago)
+        
+        session.execute("""
+            INSERT INTO PAGO (usuario_id, pago_id, carrito_id, fecha, monto, metodo)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, 
+        (carrito.usuario_id, pago_id, carrito.carrito_id, date, carrito.monto, Metodo_pago(metodo_pago,correo)))
+        
+        lista_productos = {Prdcto_anddo(producto.producto_id, producto.nombre, producto.precio, producto.monto, producto.cantidad) for producto in carrito.productos}
+        
+        session.execute("""
+            INSERT INTO RECIBO (usuario_id, recibo_id, carrito_id, pago_id, fecha, monto, metodo, productos)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """, (carrito.usuario_id, recibo_id, carrito.carrito_id, pago_id, date, carrito.monto, Metodo_pago(metodo_pago,correo), lista_productos))
+        
+        
+        session.execute("""
+			INSERT INTO CARRITO (usuario_id, carrito_id, fecha, monto, productos)
+			VALUES (%s, %s, %s, %s, %s)
+			""", (carrito.usuario_id, carrito_id, date, 0, {}))
+
+        SM.set(sessionF, 'carrito_id', carrito_id)
+
+    return redirect(url_for('recibo'))
+
 @app.route('/Soporte')
 def soporte():
   	return render_template('soporte.html', usuario=sessionF)
@@ -218,15 +260,30 @@ def PComprados():
 def LSoportes():
   	return render_template('lista-soportes.html', usuario=sessionF)
 
+
 @app.route('/LRecibos')
 def LRecibos():
-	return render_template('lista-recibos.html', usuario=sessionF)
+    recibos = session.execute("""
+		SELECT * FROM recibo
+		WHERE usuario_id=%s ALLOW FILTERING
+		""", (sessionF['usuario_id'], ))
+    
+    lista_recibos = [recibo._asdict() for recibo in recibos]
+    
+    
+    return render_template('lista-recibos.html', usuario=sessionF, recibos=lista_recibos)
+
 
 @app.route('/recibo')
 def recibo():
-	metodo_pago = request.args.get('metodoPago')
-	# Aquí puedes procesar más información para el recibo si es necesario
-	return render_template('recibo.html', metodoPago=metodo_pago, usuario=sessionF)
+    recibo_reciente = session.execute("""
+		SELECT * FROM recibo 
+		WHERE usuario_id=%s 
+		ORDER BY fecha DESC 
+		LIMIT 1
+	""", (sessionF['usuario_id'], )).one()
+    
+    return render_template('recibo.html', usuario=sessionF, recibo=recibo_reciente)
 
 
 @app.route('/producto/<uuid:producto_id>')

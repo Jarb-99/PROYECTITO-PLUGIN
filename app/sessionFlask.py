@@ -48,7 +48,6 @@ def set_usuario(session, usuario_id, carrito_id, nombre='', apellido='', correo=
     session['telefono'] = telefono
 
 
-
 #############################################
 #   GETTERS
 

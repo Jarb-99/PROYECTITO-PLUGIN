@@ -72,17 +72,17 @@ def insertDatas():
         (usuario3_id, pago3_id, carrito3_id, date(2023, 1, 3), 300.0, Metodo_pago('Efectivo', 'Pago en efectivo'))
     ]
 
+
     recibos = [
-        (usuario1_id, recibo1_id, carrito1_id, pago1_id, date(2023, 1, 1), 400.0, Metodo_pago('Tarjeta de Crédito', 'Pago con tarjeta de crédito')),
-        (usuario2_id, recibo2_id, carrito2_id, pago2_id, date(2023, 1, 2), 200.0, Metodo_pago('PayPal', 'Pago con PayPal')),
-        (usuario3_id, recibo3_id, carrito3_id, pago3_id, date(2023, 1, 3), 300.0, Metodo_pago('Efectivo', 'Pago en efectivo'))
+        (usuario1_id, recibo1_id, carrito1_id, pago1_id, date(2023, 1, 1), 400.0, Metodo_pago('Tarjeta de Crédito', 'Pago con tarjeta de crédito'), {Prdcto_anddo(producto1_id, 'Producto 1', 100.0, 200.0, 2)}),
+        (usuario2_id, recibo2_id, carrito2_id, pago2_id, date(2023, 1, 2), 200.0, Metodo_pago('PayPal', 'Pago con PayPal'), {Prdcto_anddo(producto2_id, 'Producto 2', 200.0, 200.0, 1)}),
+        (usuario3_id, recibo3_id, carrito3_id, pago3_id, date(2023, 1, 3), 300.0, Metodo_pago('Paypal', 'Pago con PayPal'), {Prdcto_anddo(producto3_id, 'Producto 3', 300.0, 300.0, 1)})
     ]
 
     productos_comprados = [
-        (usuario1_id, producto1_id, date(2023, 1, 1), 2),
-        (usuario1_id, producto2_id, date(2023, 1, 1), 1),
-        (usuario2_id, producto2_id, date(2023, 1, 2), 1),
-        (usuario3_id, producto3_id, date(2023, 1, 3), 1)
+        (usuario1_id, producto1_id, date(2023, 1, 1), 'Producto 1',100, 2),
+        (usuario2_id, producto2_id, date(2023, 1, 2), 'Producto 2',200, 1),
+        (usuario3_id, producto3_id, date(2023, 1, 3), 'Producto 3',300, 1)
     ]
 
     comentarios_productos = [
@@ -142,15 +142,15 @@ def insertDatas():
     # Insertar datos en la tabla RECIBO
     for recibo in recibos:
         session.execute("""
-            INSERT INTO RECIBO (usuario_id, recibo_id, carrito_id, pago_id, fecha, monto, metodo)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO RECIBO (usuario_id, recibo_id, carrito_id, pago_id, fecha, monto, metodo, productos)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         """, recibo)
 
     # Insertar datos en la tabla PRDCTO_CMPRDO
     for producto_comprado in productos_comprados:
         session.execute("""
-            INSERT INTO PRDCTO_CMPRDO (usuario_id, producto_id, fecha, cantidad)
-            VALUES (%s, %s, %s, %s)
+            INSERT INTO PRDCTO_CMPRDO (usuario_id, producto_id, fecha, nombre, precio, cantidad)
+            VALUES (%s, %s, %s, %s, %s, %s)
         """, producto_comprado)
 
     # Insertar datos en la tabla CMNTRIO_PRDCTO

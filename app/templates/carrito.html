@@ -13,6 +13,7 @@
         {% include 'navbar.html' %}        
     </header>
 
+
     <div class="container mt-4">
         <h1>Carrito de Compras</h1>
         <section id="carrito">
@@ -50,19 +51,44 @@
                         </li>
                     {% endfor %}
                 {% else %}
-                    <li class="list-group-item d-flex justify-content-between align-items-center"></li>
+                    <li class="list-group-item">El carrito está vacío.</li>
                 {% endif %}
             </ul>
             <h3>Total: $<span id="totalCarrito">{{ carrito.monto }}</span></h3>
-            <div class="form-group">
-                <label for="metodoPago">Método de Pago:</label>
-                <select id="metodoPago" class="form-control">
-                    <option value="tarjeta">Tarjeta</option>
-                    <option value="paypal">Paypal</option>
-                </select>
-            </div>
-            <button id="pagarBtn" class="btn btn-success">Pagar</button>
+
+            {% if carrito.productos %}
+                <form action="{{ url_for('pagar_carrito') }}" method="POST">
+                    <div class="form-group">
+                        <label for="metodoPago">Método de Pago:</label>
+                        <select id="metodoPago" name="metodoPago" class="form-control" onchange="toggleCorreoInput()">
+                            <option value="">Selecciona un método de pago</option>
+                            <option value="tarjeta">Tarjeta</option>
+                            <option value="paypal">Paypal</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="correoInput" style="display: none;">
+                        <label for="correo">Correo:</label>
+                        <input type="email" id="correo" name="correo" class="form-control" required>
+                    </div>
+                    
+                    <button type="submit" id="pagarBtn" class="btn btn-success">Pagar</button>
+                </form>
+            {% else %}
+                <a href="{{ url_for('index') }}" class="btn btn-success">Ver productos</a>
+            {% endif %}
         </section>
     </div>
+
+    <script>
+        function toggleCorreoInput() {
+            var metodoPago = document.getElementById("metodoPago").value;
+            var correoInput = document.getElementById("correoInput");
+            if (metodoPago === "") {
+                correoInput.style.display = "none";
+            } else {
+                correoInput.style.display = "block";
+            }
+        }
+    </script>
 </body>
 </html>
