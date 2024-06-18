@@ -11,8 +11,9 @@ class Respuesta:
         self.nombre_creador = nombre_creador
 
 class Prdcto_anddo:
-    def __init__(self, producto_id, monto, cantidad):
+    def __init__(self, producto_id, precio, monto, cantidad):
         self.producto_id = producto_id
+        self.precio = precio
         self.monto = monto
         self.cantidad = cantidad
 

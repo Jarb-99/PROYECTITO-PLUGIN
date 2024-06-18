@@ -23,6 +23,7 @@ def set(session, key, atribute):
 def set_usuario_dict(session, usuario):
     clear(session)
     session['usuario_id'] = usuario['usuario_id']
+    session['carrito_id'] = usuario['carrito_id']
     session['nombre'] = usuario['nombre']
     session['apellido'] = usuario['apellido']
     session['correo'] = usuario['correo']
@@ -33,9 +34,10 @@ def set_usuario_dict(session, usuario):
     session['telefono'] = usuario['telefono']
 
 
-def set_usuario(session, usuario_id, nombre='', apellido='', correo='', contrasena='', fecha_rgstro='', foto='', direccion='', telefono=''):
+def set_usuario(session, usuario_id, carrito_id, nombre='', apellido='', correo='', contrasena='', fecha_rgstro='', foto='', direccion='', telefono=''):
     clear(session)
     session['usuario_id'] = usuario_id
+    session['carrito_id'] = carrito_id
     session['nombre'] = nombre
     session['apellido'] = apellido
     session['correo'] = correo
@@ -53,6 +55,7 @@ def set_usuario(session, usuario_id, nombre='', apellido='', correo='', contrase
 def get_usuario(session):
     return {
         'usuario_id': session.get('usuario_id'),
+        'carrito_id': session.get('carrito_id'),
         'nombre': session.get('nombre'),
         'apellido': session.get('apellido'),
         'correo': session.get('correo'),

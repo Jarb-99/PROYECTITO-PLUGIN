@@ -34,9 +34,9 @@ def insertDatas():
 
     # Datos de prueba
     usuarios = [
-        (usuario1_id, 'Juan', 'Perez', 'juan.perez@example.com', 'password123', date(2023, 1, 1), 'foto1.jpg', 'Calle Falsa 123', '1234567890'),
-        (usuario2_id, 'Maria', 'Gomez', 'maria.gomez@example.com', 'password123', date(2023, 1, 2), 'foto2.jpg', 'Avenida Siempre Viva 456', '0987654321'),
-        (usuario3_id, 'Pedro', 'Lopez', 'pedro.lopez@example.com', 'password123', date(2023, 1, 3), 'foto3.jpg', 'Boulevard de los Sueños 789', '1122334455')
+        (usuario1_id, carrito1_id, 'Juan', 'Perez', 'juan.perez@example.com', 'password123', date(2023, 1, 1), 'foto1.jpg', 'Calle Falsa 123', '1234567890'),
+        (usuario2_id, carrito2_id, 'Maria', 'Gomez', 'maria.gomez@example.com', 'password123', date(2023, 1, 2), 'foto2.jpg', 'Avenida Siempre Viva 456', '0987654321'),
+        (usuario3_id, carrito3_id, 'Pedro', 'Lopez', 'pedro.lopez@example.com', 'password123', date(2023, 1, 3), 'foto3.jpg', 'Boulevard de los Sueños 789', '1122334455')
     ]
 
     propietarios = [
@@ -60,9 +60,9 @@ def insertDatas():
 
     session.user_type_registered(keyspace, 'prdcto_anddo', Prdcto_anddo)
     carritos = [
-        (usuario1_id, carrito1_id, date(2023, 1, 1), 400.0, {Prdcto_anddo(producto1_id, 200.0, 2)}),
-        (usuario2_id, carrito2_id, date(2023, 1, 2), 200.0, {Prdcto_anddo(producto2_id, 200.0, 1)}),
-        (usuario3_id, carrito3_id, date(2023, 1, 3), 300.0, {Prdcto_anddo(producto3_id, 300.0, 1)})
+        (usuario1_id, carrito1_id, date(2023, 1, 1), 400.0, {Prdcto_anddo(producto1_id, 100.0, 200.0, 2)}),
+        (usuario2_id, carrito2_id, date(2023, 1, 2), 200.0, {Prdcto_anddo(producto2_id, 200.0, 200.0, 1)}),
+        (usuario3_id, carrito3_id, date(2023, 1, 3), 300.0, {Prdcto_anddo(producto3_id, 300.0, 300.0, 1)})
     ]
 
     session.user_type_registered(keyspace, 'metodo_pago', Metodo_pago)
@@ -100,8 +100,8 @@ def insertDatas():
     # Insertar datos en la tabla USUARIO
     for usuario in usuarios:
         session.execute("""
-            INSERT INTO USUARIO (usuario_id, nombre, apellido, correo, contrasena, fecha_rgstro, foto, direccion, telefono)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO USUARIO (usuario_id, carrito_id, nombre, apellido, correo, contrasena, fecha_rgstro, foto, direccion, telefono)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, usuario)
 
     # Insertar datos en la tabla PROPIETARIO

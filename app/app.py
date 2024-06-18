@@ -6,6 +6,7 @@ from connection import get_cassandra_session
 from ScriptsCQL import createTables, deleteTables, insert
 from uuid import uuid4, UUID
 from datetime import datetime, date
+from UDTs import *
 import json
 
 app = Flask(__name__)
@@ -79,15 +80,22 @@ def register():
 		
 		else:
 			usuario_id = uuid4()
+			carrito_id = uuid4()
 			date = datetime.now().date()
 
-			SM.set_usuario(sessionF, usuario_id, nombre, apellido, correo, contrasena, date.strftime("%Y-%m-%d"), '', '', '')
+			SM.set_usuario(sessionF, usuario_id, carrito_id, nombre, apellido, correo, contrasena, date.strftime("%Y-%m-%d"), '', '', '')
 
 			session.execute("""
 					INSERT INTO USUARIO (usuario_id, nombre, apellido, correo, contrasena, fecha_rgstro, foto, direccion, telefono)
 					VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
 				""", 
 				(usuario_id, nombre, apellido, correo, contrasena, date, '', '', ''))
+
+			session.user_type_registered(keyspace, 'prdcto_anddo', Prdcto_anddo)
+			session.execute("""
+				INSERT INTO CARRITO (usuario_id, carrito_id, fecha, monto, productos)
+				VALUES (%s, %s, %s, %s, %s)
+			""", (usuario_id, carrito_id, date, 0, {}))
 			
 			return redirect(url_for('index'))
 	return render_template('register.html')
@@ -97,13 +105,31 @@ def register():
 def perfil():
   	return render_template('perfil.html', usuario=sessionF)
 
+
 @app.route('/Carrito', methods=['GET', 'POST'])
 def carrito():
+    carrito = session.execute("""
+		SELECT * FROM carrito 
+		WHERE carrito_id=%s ALLOW FILTERING
+		""", (sessionF['carrito_id'],)).one()
+    
     if request.method == 'POST':
-        cantidad = request.form['cantidad']
-        producto_id = request.form['producto_id']
+        cantidad = int(request.form['cantidad'])
+        producto_id = UUID(request.form['producto_id'])
+        precio = float(request.form['precio'])
+        monto = cantidad*precio
         
-    return render_template('carrito.html', usuario=sessionF)
+        session.user_type_registered(keyspace, 'prdcto_anddo', Prdcto_anddo)
+        
+        session.execute("""
+			UPDATE carrito 
+			SET productos = productos + %s, monto = %s 
+			WHERE carrito_id=%s AND usuario_id=%s AND fecha=%s 
+			""", 
+   			({Prdcto_anddo(producto_id, precio, monto, cantidad)}, float(carrito.monto) + monto, carrito.carrito_id, carrito.usuario_id, carrito.fecha))
+
+        
+    return render_template('carrito.html', usuario=sessionF, carrito=carrito)
 
 @app.route('/Soporte')
 def soporte():

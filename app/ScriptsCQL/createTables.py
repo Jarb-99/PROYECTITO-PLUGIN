@@ -7,6 +7,7 @@ def createTables():
     session.execute("""
     CREATE TYPE IF NOT EXISTS PRDCTO_ANDDO (
         producto_id UUID,
+        precio DECIMAL,
         monto DECIMAL,
         cantidad INT
     );
@@ -43,6 +44,7 @@ def createTables():
     session.execute("""
     CREATE TABLE IF NOT EXISTS USUARIO (
         usuario_id UUID PRIMARY KEY,
+        carrito_id UUID,
         nombre TEXT,
         apellido TEXT,
         correo TEXT,
