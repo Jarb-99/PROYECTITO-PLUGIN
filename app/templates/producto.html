@@ -5,31 +5,78 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Producto</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/stylesProducto.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 <body>
-    <header class="bg-dark text-white p-3">
+    <header class="navbar navbar-expand-lg navbar-dark bg-dark">
         {% include 'navbar.html' %}
     </header>
+
     <div class="container mt-4">
-        <section id="detalleProducto">
-            <h2 id="nombreProducto">Producto 1</h2>
-            <p id="descripcionProducto">Descripción del producto.</p>
-            <p id="cantidadProducto">Cantidad disponible: 10</p>
-            <div id="comentariosProducto" class="mb-4">
-                <h4>Comentarios</h4>
-                <ul class="list-group">
-                    <li class="list-group-item">Comentario 1</li>
-                    <li class="list-group-item">Comentario 2</li>
-                </ul>
+        <section id="detalleProducto" class="mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h2 class="card-title">{{ producto.nombre }}</h2>
+                    <p class="card-text">{{ producto.descripcion }}</p>
+                    <p class="card-text">Precio: ${{ producto.precio }}</p>
+                    <p class="card-text">Valoración:
+                        {% for i in range(producto.valoracion) %}
+                            <span class="fa fa-star checked"></span>
+                        {% endfor %}
+                        {% for i in range(5 - producto.valoracion) %}
+                            <span class="fa fa-star-o"></span>
+                        {% endfor %}
+                    </p>
+                    <p class="card-text">Compras: {{ producto.compras }}</p>
+                    <p class="card-text">Fecha: {{ producto.fecha }}</p>
+                    <p class="card-text">Versión Compatible: {{ producto.version_comptble }}</p>
+                    {% if producto.plugins %}
+                        <p class="card-text">Plugins:
+                            <ul>
+                                {% for plugin in producto.plugins %}
+                                    <li>Versión: {{ plugin.version }}</li>
+                                {% endfor %}
+                            </ul>
+                        </p>
+                    {% endif %}
+                    {% if producto.schematics %}
+                        <p class="card-text">Schematics:
+                            <ul>
+                                {% for schematic in producto.schematics %}
+                                    <li>Dimensiones: {{ schematic.dimensiones }}</li>
+                                {% endfor %}
+                            </ul>
+                        </p>
+                    {% endif %}
+                    <form action="{{ url_for('carrito') }}" method="POST">
+                        <div class="form-group d-flex align-items-center">
+                            <label for="cantidad" class="mr-2 mb-0">Cantidad:</label>
+                            
+                            <input type="number" id="cantidad" name="cantidad" class="form-control mr-3" value="1" min="1" required style="width: 70px;">
+
+                            <input type="hidden" name="producto_id" value="{{ producto.producto_id }}">
+                            
+                            <button type="submit" id="añadirCarritoBtn" class="btn btn-success">Añadir al Carrito</button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <button id="añadirCarritoBtn" class="btn btn-success">Añadir al Carrito</button>
-            <button id="cancelarBtn" class="btn btn-secondary">Cancelar</button>
+        </section>
+
+        <section id="comentariosProducto" class="mb-4">
+            <h4>Comentarios</h4>
+            <div class="list-group card">
+                {% for comentario in lista_comentarios %}
+                <div class="list-group-item">
+                    <h5 class="mb-1">{{ comentario.nombre_usuario }}</h5>
+                    <p class="mb-1">{{ comentario.descripcion }}</p>
+                    <small class="text-muted">{{ comentario.fecha }}</small>
+                </div>
+                {% endfor %}
+            </div>
         </section>
     </div>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="js/product.js"></script>
+
 </body>
 </html>

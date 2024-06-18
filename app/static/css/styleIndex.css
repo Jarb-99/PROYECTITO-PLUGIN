@@ -8,7 +8,6 @@ body {
 
 header.navbar {
     background-color: #343a40;
-    border-bottom: 1px solid #ddd;
 }
 
 header.navbar .nav-link {
@@ -26,18 +25,6 @@ header .container {
     display: flex;
     justify-content: space-between;
     align-items: center;
-}
-
-header a {
-    color: #fff;
-    text-decoration: none;
-    padding: 10px;
-    transition: background-color 0.3s;
-}
-
-header a:hover {
-    background-color: #495057;
-    border-radius: 5px;
 }
 
 .main-header {
@@ -93,65 +80,12 @@ header a:hover {
     border-color: #0056b3;
 }
 
-.btn-secondary {
-    background-color: #6c757d;
-    border-color: #6c757d;
-}
-
-.btn-secondary:hover {
-    background-color: #5a6268;
-    border-color: #5a6268;
-}
-
-.container {
-    margin-top: 40px;
-}
-
-.welcome-message {
-    color: white;
-    font-size: 5vw; 
-    margin-top: 10px; 
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    text-align: center; 
-    transform: translate(2%, 0);
-}
-
-.register-link {
-    color: white;
-    text-decoration: none;
-    margin-top: 10px;
-    display: inline-block;
-    cursor: pointer;
-}
-
-.register-link:hover {
-    text-decoration: underline;
-    color: skyblue;
-}
-
 .checked {
-    color: orange;
-}
-
-.card-body .star-rating {
-    font-size: 1rem;
     color: orange;
 }
 
 .card-body .star-rating .fa {
     margin-right: 5px;
-}
-
-.card-body .star-rating .fa-star,
-.card-body .star-rating .fa-star-o {
-    font-size: 1rem;
-}
-
-.card-body p {
-    margin-bottom: 0.5rem;
 }
 
 .card-body .compras {
@@ -167,8 +101,4 @@ header a:hover {
 .card-body .valoracion .stars {
     display: inline-block;
     margin-right: 10px;
-}
-
-.card-body .btn-group {
-    margin-left: 10px;
 }

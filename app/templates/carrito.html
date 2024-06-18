@@ -11,6 +11,7 @@
     <header class="navbar navbar-expand-lg navbar-dark bg-dark">
         {% include 'navbar.html' %}
     </header>
+
     <div class="container mt-4">
         <section id="carrito">
             <ul id="listaCarrito" class="list-group mb-4"></ul>
@@ -29,9 +30,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
-        function loadContent(page) {
-            window.location.href = '/' + page;
-        }
 
         function cargarCarrito() {
             const listaCarrito = document.getElementById('listaCarrito');

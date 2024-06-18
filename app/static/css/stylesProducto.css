@@ -1,0 +1,125 @@
+/* styles.css */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #c77633;
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
+
+header.navbar {
+    background-color: #343a40;
+    border-bottom: 1px solid #ddd;
+}
+
+header.navbar .nav-link {
+    color: #fff !important;
+    padding: 10px 15px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+header.navbar .nav-link:hover {
+    background-color: #495057;
+    border-radius: 5px;
+}
+
+header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card {
+    margin-top: 20px;
+    border: none;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+    background-color: #fff;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.card-title {
+    color: #343a40;
+    margin-bottom: 15px;
+}
+
+.card-text {
+    color: #6c757d;
+}
+
+.btn {
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+    color: #fff;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: #fff;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+}
+
+.container {
+    margin-top: 40px;
+}
+
+#comentariosProducto .list-group-item {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    padding: 20px;
+    transition: background-color 0.3s, box-shadow 0.3s;
+    background-color: #fff;
+}
+
+#comentariosProducto .list-group-item:hover {
+    background-color: #f1f1f1;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+#comentariosProducto h4 {
+    margin-bottom: 20px;
+    color: #343a40;
+}
+
+.checked {
+    color: #ffa500;
+}
+
+input.form-control {
+    display: inline-block;
+    width: auto;
+}
+
+.form-group {
+    display: flex;
+    align-items: center;
+}
+
+form label {
+    margin-right: 10px;
+}
+
+form .form-control {
+    margin-right: 10px;
+    width: 70px;
+}

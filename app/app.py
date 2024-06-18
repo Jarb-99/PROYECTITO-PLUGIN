@@ -4,7 +4,7 @@ from flask import session as sessionF
 import sessionFlask as SM 
 from connection import get_cassandra_session
 from ScriptsCQL import createTables, deleteTables, insert
-from uuid import uuid4
+from uuid import uuid4, UUID
 from datetime import datetime, date
 import json
 
@@ -97,9 +97,13 @@ def register():
 def perfil():
   	return render_template('perfil.html', usuario=sessionF)
 
-@app.route('/Carrito')
+@app.route('/Carrito', methods=['GET', 'POST'])
 def carrito():
-  	return render_template('carrito.html', usuario=sessionF)
+    if request.method == 'POST':
+        cantidad = request.form['cantidad']
+        producto_id = request.form['producto_id']
+        
+    return render_template('carrito.html', usuario=sessionF)
 
 @app.route('/Soporte')
 def soporte():
@@ -128,10 +132,23 @@ def recibo():
 	return render_template('recibo.html', metodoPago=metodo_pago, usuario=sessionF)
 
 
-@app.route('/Producto')
-def todas_peliculas():
-	peliculas = all_movies()
-	return render_template('producto.html', peliculas=peliculas, usuario=sessionF)
+@app.route('/producto/<uuid:producto_id>')
+def producto(producto_id):
+    
+    producto = session.execute("""
+        SELECT * FROM producto WHERE producto_id = %s
+    """, (producto_id,)).one()
+    
+    comentario_producto = session.execute("""
+        SELECT * FROM cmntrio_prdcto WHERE producto_id = %s
+    """, (producto_id,))
+    
+    lista_comentarios = [comentario._asdict() for comentario in comentario_producto]
+ 
+    if not producto:
+        return redirect(url_for('index'))
+
+    return render_template('producto.html', producto=producto, usuario=sessionF, lista_comentarios=lista_comentarios)
 
 
 if __name__ == '__main__':
