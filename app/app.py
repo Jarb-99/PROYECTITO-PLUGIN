@@ -22,11 +22,18 @@ if boolTables:
 	insert.insertDatas()  
 
 #############################################
+# global de productos para ahorrar las consultas por usuarios
+productos = session.execute("""
+		SELECT * FROM producto
+		""")
+lista_productos = [producto._asdict() for producto in productos]
+
+#############################################
 # Views/Urls
 @app.route('/')
 def index():
-
-  	return render_template('index.html', usuario=sessionF)
+	  
+	return render_template('index.html', usuario=sessionF, productos=lista_productos)
 
 @app.route('/login', methods=['GET','POST'])
 def login():
@@ -85,49 +92,46 @@ def register():
 			return redirect(url_for('index'))
 	return render_template('register.html')
 
-@app.route('/Home')
-def home():
-	return render_template('index.html')
 
 @app.route('/Perfil')
 def perfil():
-  	return render_template('perfil.html')
+  	return render_template('perfil.html', usuario=sessionF)
 
 @app.route('/Carrito')
 def carrito():
-  	return render_template('carrito.html')
+  	return render_template('carrito.html', usuario=sessionF)
 
 @app.route('/Soporte')
 def soporte():
-  	return render_template('soporte.html')
+  	return render_template('soporte.html', usuario=sessionF)
 
 @app.route('/Logout')
 def logout():
-  	return render_template('login.html')
+  	return render_template('login.html', usuario=sessionF)
 
 @app.route('/PComprados')
 def PComprados():
-  	return render_template('productos-comprados.html')
+  	return render_template('productos-comprados.html', usuario=sessionF)
 
 @app.route('/LSoportes')
 def LSoportes():
-  	return render_template('lista-soportes.html')
+  	return render_template('lista-soportes.html', usuario=sessionF)
 
 @app.route('/LRecibos')
 def LRecibos():
-	return render_template('lista-recibos.html')
+	return render_template('lista-recibos.html', usuario=sessionF)
 
 @app.route('/recibo')
 def recibo():
 	metodo_pago = request.args.get('metodoPago')
 	# Aquí puedes procesar más información para el recibo si es necesario
-	return render_template('recibo.html', metodoPago=metodo_pago)
+	return render_template('recibo.html', metodoPago=metodo_pago, usuario=sessionF)
 
 
 @app.route('/Producto')
 def todas_peliculas():
 	peliculas = all_movies()
-	return render_template('producto.html', peliculas=peliculas)
+	return render_template('producto.html', peliculas=peliculas, usuario=sessionF)
 
 
 if __name__ == '__main__':

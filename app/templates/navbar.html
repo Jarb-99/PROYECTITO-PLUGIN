@@ -1,0 +1,16 @@
+
+<div class="container">
+    <a class="navbar-brand" href="#">Tienda de Plugins</a>
+    <div class="navbar-nav">
+        <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+
+        <a class="nav-link" href="{{ url_for('perfil') }}">Perfil( {{ usuario['nombre'] }} )</a>
+        <a class="nav-link" href="{{ url_for('carrito') }}">Carrito</a>
+        <a class="nav-link" href="{{ url_for('soporte') }}"">Soporte</a>
+        <a class="nav-link" href="{{ url_for('logout') }}">Log out</a>
+    </div>
+</div>
+
+<!-- decimos que hay mas codigo siguiente -->
+{% block content %}
+{% endblock %}

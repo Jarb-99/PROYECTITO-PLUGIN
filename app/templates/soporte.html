@@ -9,16 +9,7 @@
 </head>
 <body>
     <header class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="#">Crear Soporte</a>
-            <div class="navbar-nav">
-                <a class="nav-link" href="#" onclick="loadContent('Home')">Home</a>
-                <a class="nav-link" href="#" onclick="loadContent('Perfil')">Perfil</a>
-                <a class="nav-link" href="#" onclick="loadContent('Carrito')">Carrito</a>
-                <a class="nav-link" href="#" onclick="loadContent('LSoportes')">Lista de Soportes</a>
-                <a class="nav-link" href="#" onclick="loadContent('Logout')">Logout</a>
-            </div>
-        </div>
+        {% include 'navbar.html' %}
     </header>
     <div class="container mt-4">
         <section id="crearSoporte">
