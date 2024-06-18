@@ -117,6 +117,7 @@ def carrito():
         cantidad = int(request.form['cantidad'])
         producto_id = UUID(request.form['producto_id'])
         precio = float(request.form['precio'])
+        nombre = request.form['nombre']
         monto = cantidad*precio
         
         session.user_type_registered(keyspace, 'prdcto_anddo', Prdcto_anddo)
@@ -126,8 +127,12 @@ def carrito():
 			SET productos = productos + %s, monto = %s 
 			WHERE carrito_id=%s AND usuario_id=%s AND fecha=%s 
 			""", 
-   			({Prdcto_anddo(producto_id, precio, monto, cantidad)}, float(carrito.monto) + monto, carrito.carrito_id, carrito.usuario_id, carrito.fecha))
-
+   			({Prdcto_anddo(producto_id, nombre, precio, monto, cantidad)}, float(carrito.monto) + monto, carrito.carrito_id, carrito.usuario_id, carrito.fecha))
+        
+        carrito = session.execute("""
+			SELECT * FROM carrito 
+			WHERE carrito_id=%s ALLOW FILTERING
+			""", (sessionF['carrito_id'],)).one()
         
     return render_template('carrito.html', usuario=sessionF, carrito=carrito)
 

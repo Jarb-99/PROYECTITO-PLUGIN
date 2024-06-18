@@ -60,9 +60,9 @@ def insertDatas():
 
     session.user_type_registered(keyspace, 'prdcto_anddo', Prdcto_anddo)
     carritos = [
-        (usuario1_id, carrito1_id, date(2023, 1, 1), 400.0, {Prdcto_anddo(producto1_id, 100.0, 200.0, 2)}),
-        (usuario2_id, carrito2_id, date(2023, 1, 2), 200.0, {Prdcto_anddo(producto2_id, 200.0, 200.0, 1)}),
-        (usuario3_id, carrito3_id, date(2023, 1, 3), 300.0, {Prdcto_anddo(producto3_id, 300.0, 300.0, 1)})
+        (usuario1_id, carrito1_id, date(2023, 1, 1), 400.0, {Prdcto_anddo(producto1_id, 'Producto 1', 100.0, 200.0, 2)}),
+        (usuario2_id, carrito2_id, date(2023, 1, 2), 200.0, {Prdcto_anddo(producto2_id, 'Producto 2', 200.0, 200.0, 1)}),
+        (usuario3_id, carrito3_id, date(2023, 1, 3), 300.0, {Prdcto_anddo(producto3_id, 'Producto 3', 300.0, 300.0, 1)})
     ]
 
     session.user_type_registered(keyspace, 'metodo_pago', Metodo_pago)

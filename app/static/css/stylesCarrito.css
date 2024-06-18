@@ -1,0 +1,87 @@
+/* styles.css */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #c77633;
+    margin: 0;
+    padding: 0;
+}
+
+header.navbar {
+    background-color: #343a40;
+    border-bottom: 1px solid #ddd;
+}
+
+header.navbar .nav-link {
+    color: #fff !important;
+    padding: 10px 15px;
+    transition: background-color 0.3s;
+}
+
+header.navbar .nav-link:hover {
+    background-color: #495057;
+    border-radius: 5px;
+}
+
+header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header a {
+    color: #fff;
+    text-decoration: none;
+    padding: 10px;
+    transition: background-color 0.3s;
+}
+
+header a:hover {
+    background-color: #495057;
+    border-radius: 5px;
+}
+
+h1 {
+    color: #343a40;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#carrito .list-group-item {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    padding: 20px;
+}
+
+#carrito .list-group-item h5 {
+    margin: 0 0 10px 0;
+}
+
+#carrito .list-group-item p {
+    margin: 0;
+    color: #6c757d;
+}
+
+#totalCarrito {
+    font-size: 1.5rem;
+    color: #343a40;
+}
+
+.form-group {
+    margin-top: 20px;
+}
+
+#pagarBtn {
+    margin-top: 20px;
+}
+
+.btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+}

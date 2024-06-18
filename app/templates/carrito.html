@@ -5,17 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carrito</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/stylesCarrito.css') }}">
 </head>
 <body>
     <header class="navbar navbar-expand-lg navbar-dark bg-dark">
-        {% include 'navbar.html' %}
+        {% include 'navbar.html' %}        
     </header>
 
     <div class="container mt-4">
+        <h1>Carrito de Compras</h1>
         <section id="carrito">
-            <ul id="listaCarrito" class="list-group mb-4"></ul>
-            <h3>Total: $<span id="totalCarrito">0</span></h3>
+            <ul id="listaCarrito" class="list-group mb-4">
+                {% for producto in carrito.productos %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5>{{ producto.nombre }}</h5>
+                            <p>Precio: ${{ producto.precio }}</p>
+                            <p>Cantidad: {{ producto.cantidad }}</p>
+                            <p>Monto: ${{ producto.monto }}</p>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+            <h3>Total: $<span id="totalCarrito">{{ carrito.monto }}</span></h3>
             <div class="form-group">
                 <label for="metodoPago">Método de Pago:</label>
                 <select id="metodoPago" class="form-control">
@@ -23,58 +35,8 @@
                     <option value="paypal">Paypal</option>
                 </select>
             </div>
-            <button id="pagarBtn" class="btn btn-success" onclick="generarRecibo()">Pagar</button>
+            <button id="pagarBtn" class="btn btn-success">Pagar</button>
         </section>
     </div>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script>
-
-        function cargarCarrito() {
-            const listaCarrito = document.getElementById('listaCarrito');
-            const totalCarrito = document.getElementById('totalCarrito');
-            let total = 0;
-            const cart = JSON.parse(localStorage.getItem('cart')) || [];
-
-            cart.forEach((product, index) => {
-                const listItem = document.createElement('li');
-                listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
-                listItem.textContent = `${product.name} - ${product.quantity} x $${product.price.toFixed(2)}`;
-
-                total += product.price * product.quantity;
-                listaCarrito.appendChild(listItem);
-            });
-
-            totalCarrito.textContent = total.toFixed(2);
-        }
-
-        function generarRecibo() {
-            const metodoPago = document.getElementById('metodoPago').value;
-            const cart = JSON.parse(localStorage.getItem('cart')) || [];
-            const total = document.getElementById('totalCarrito').textContent;
-
-            const recibo = {
-                productos: cart,
-                total: total,
-                metodoPago: metodoPago,
-                fecha: new Date().toISOString().split('T')[0]
-            };
-
-            let recibos = JSON.parse(localStorage.getItem('recibos')) || [];
-            recibos.push(recibo);
-            localStorage.setItem('recibos', JSON.stringify(recibos));
-
-            let productosComprados = JSON.parse(localStorage.getItem('productosComprados')) || [];
-            productosComprados = productosComprados.concat(cart);
-            localStorage.setItem('productosComprados', JSON.stringify(productosComprados));
-
-            localStorage.removeItem('cart');
-
-            window.location.href = '/recibo?metodoPago=' + metodoPago;
-        }
-
-        document.addEventListener('DOMContentLoaded', cargarCarrito);
-    </script>
 </body>
 </html>
