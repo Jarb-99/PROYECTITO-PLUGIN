@@ -16,7 +16,7 @@ session = get_cassandra_session()
 #############################################
 # true/ false para activar la creacion de tablas en la base de datos
 # true = puede tardar un 1 minuto la cracion de las tablas   
-boolTables = False
+boolTables = True
 if boolTables:
 	deleteTables.deleteTables()
 	createTables.createTables()
@@ -86,10 +86,10 @@ def register():
 			SM.set_usuario(sessionF, usuario_id, carrito_id, nombre, apellido, correo, contrasena, date.strftime("%Y-%m-%d"), '', '', '')
 
 			session.execute("""
-					INSERT INTO USUARIO (usuario_id, nombre, apellido, correo, contrasena, fecha_rgstro, foto, direccion, telefono)
-					VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+					INSERT INTO USUARIO (usuario_id, carrito_id, nombre, apellido, correo, contrasena, fecha_rgstro, foto, direccion, telefono)
+					VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
 				""", 
-				(usuario_id, nombre, apellido, correo, contrasena, date, '', '', ''))
+				(usuario_id, carrito_id, nombre, apellido, correo, contrasena, date, '', '', ''))
 
 			session.user_type_registered(keyspace, 'prdcto_anddo', Prdcto_anddo)
 			session.execute("""
@@ -135,6 +135,72 @@ def carrito():
 			""", (sessionF['carrito_id'],)).one()
         
     return render_template('carrito.html', usuario=sessionF, carrito=carrito)
+
+@app.route('/Carrito/edit', methods=['POST'])
+def editar_producto_carrito():
+    
+    if request.method == 'POST':
+        carrito = session.execute("""
+			SELECT * FROM carrito 
+			WHERE carrito_id=%s ALLOW FILTERING
+			""", (sessionF['carrito_id'],)).one()
+        
+        producto_id = UUID(request.form['producto_id'])
+        nueva_cantidad = int(request.form['nuevacantidad'])
+        cantidad = int(request.form['cantidad'])
+        precio = float(request.form['precio'])
+        nombre = request.form['nombre']
+        actual_monto = float(request.form['monto'])
+        monto = nueva_cantidad*precio
+        old_monto = cantidad*precio
+        
+        session.user_type_registered(keyspace, 'prdcto_anddo', Prdcto_anddo)
+        
+        session.execute("""
+            UPDATE carrito 
+            SET productos = productos -  %s, productos = productos  +  %s, monto = %s 
+            WHERE carrito_id = %s AND usuario_id = %s AND fecha = %s
+        """, (
+            {Prdcto_anddo(producto_id, nombre, precio, old_monto, cantidad)},
+            {Prdcto_anddo(producto_id, nombre, precio, monto, nueva_cantidad)},
+            actual_monto - old_monto + monto,
+            carrito.carrito_id,
+            carrito.usuario_id,
+            carrito.fecha
+        ))
+    
+    return redirect(url_for('carrito'))
+
+@app.route('/Carrito/del', methods=['POST'])
+def eliminar_producto_carrito():
+    if request.method == 'POST':
+        carrito = session.execute("""
+			SELECT * FROM carrito 
+			WHERE carrito_id=%s ALLOW FILTERING
+			""", (sessionF['carrito_id'],)).one()
+        
+        producto_id = UUID(request.form['producto_id'])	
+        cantidad = int(request.form['cantidad'])
+        precio = float(request.form['precio'])
+        nombre = request.form['nombre']
+        actual_monto = float(request.form['monto'])
+        old_monto = cantidad*precio
+        
+        session.user_type_registered(keyspace, 'prdcto_anddo', Prdcto_anddo)
+        
+        session.execute("""
+			UPDATE carrito 
+			SET productos = productos - %s, monto = %s 
+			WHERE carrito_id = %s AND usuario_id = %s AND fecha = %s
+		""", (
+		{Prdcto_anddo(producto_id, nombre, precio, old_monto, cantidad)},
+		actual_monto -  old_monto,
+		carrito.carrito_id,
+		carrito.usuario_id,
+		carrito.fecha
+	))
+    
+    return redirect(url_for('carrito'))
 
 @app.route('/Soporte')
 def soporte():

@@ -6,6 +6,7 @@
     <title>Carrito</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/stylesCarrito.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
     <header class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -16,16 +17,41 @@
         <h1>Carrito de Compras</h1>
         <section id="carrito">
             <ul id="listaCarrito" class="list-group mb-4">
-                {% for producto in carrito.productos %}
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <h5>{{ producto.nombre }}</h5>
-                            <p>Precio: ${{ producto.precio }}</p>
-                            <p>Cantidad: {{ producto.cantidad }}</p>
-                            <p>Monto: ${{ producto.monto }}</p>
-                        </div>
-                    </li>
-                {% endfor %}
+                {% if carrito.productos %}
+                    {% for producto in carrito.productos %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5>{{ producto.nombre }}</h5>
+                                <p>Precio: ${{ producto.precio }}</p>
+                                <p>Cantidad: {{ producto.cantidad }}</p>
+                                <p>Monto: ${{ producto.monto }}</p>
+                            </div>
+                            <div>
+                                <form action="{{ url_for('editar_producto_carrito') }}" method="POST" class="d-inline">
+                                    <input type="hidden" name="producto_id" value="{{ producto.producto_id }}">
+                                    <input type="hidden" name="precio" value="{{ producto.precio }}">
+                                    <input type="hidden" name="nombre" value="{{ producto.nombre }}">
+                                    <input type="hidden" name="cantidad" value="{{ producto.cantidad }}">
+                                    <input type="hidden" name="monto" value="{{ producto.monto }}">
+
+                                    <input type="number" name="nuevacantidad" value="1" min="1" class="form-control mb-2">
+                                    <button type="submit" class="btn btn-primary">Editar</button>
+                                </form>
+                                <form action="{{ url_for('eliminar_producto_carrito') }}" method="POST" class="d-inline">
+                                    <input type="hidden" name="producto_id" value="{{ producto.producto_id }}">
+                                    <input type="hidden" name="precio" value="{{ producto.precio }}">
+                                    <input type="hidden" name="nombre" value="{{ producto.nombre }}">
+                                    <input type="hidden" name="cantidad" value="{{ producto.cantidad }}">
+                                    <input type="hidden" name="monto" value="{{ producto.monto }}">
+
+                                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                                </form>
+                            </div>
+                        </li>
+                    {% endfor %}
+                {% else %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center"></li>
+                {% endif %}
             </ul>
             <h3>Total: $<span id="totalCarrito">{{ carrito.monto }}</span></h3>
             <div class="form-group">
