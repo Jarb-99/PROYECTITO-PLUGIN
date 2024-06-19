@@ -79,7 +79,7 @@ def createTables():
 
     session.execute("""
     CREATE TABLE IF NOT EXISTS PRODUCTO (
-        producto_id UUID PRIMARY KEY,
+        producto_id UUID,
         nombre TEXT,
         descripcion TEXT,
         precio DECIMAL,
@@ -88,8 +88,9 @@ def createTables():
         compras INT,
         version_comptble TEXT,
         plugins LIST<FROZEN<PLUGIN>>,
-        schematics LIST<FROZEN<SCHEMATIC>>
-    );
+        schematics LIST<FROZEN<SCHEMATIC>>,
+        PRIMARY KEY ((producto_id), fecha)
+    ) WITH CLUSTERING ORDER BY (fecha DESC);
     """)
 
     session.execute("""
@@ -132,13 +133,13 @@ def createTables():
     session.execute("""
     CREATE TABLE IF NOT EXISTS PRDCTO_CMPRDO (
         usuario_id UUID,
-        producto_id UUID,
         fecha TIMESTAMP,
+        producto_id UUID,
         nombre TEXT,
         precio DECIMAL,
         cantidad INT,
-        PRIMARY KEY (usuario_id, producto_id, fecha)
-    );
+        PRIMARY KEY ((usuario_id), fecha, producto_id)
+    ) WITH CLUSTERING ORDER BY (fecha DESC, producto_id DESC);
     """)
 
     session.execute("""

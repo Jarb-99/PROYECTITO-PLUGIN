@@ -16,7 +16,7 @@ session = get_cassandra_session()
 #############################################
 # true/ false para activar la creacion de tablas en la base de datos
 # true = puede tardar un 1 minuto la cracion de las tablas   
-boolTables = False
+boolTables = True
 if boolTables:
 	deleteTables.deleteTables()
 	createTables.createTables()
@@ -108,7 +108,14 @@ def register():
 
 @app.route('/Perfil')
 def perfil():
-  	return render_template('perfil.html', usuario=sessionF)
+    compras_realizadas = session.execute("""
+		SELECT * FROM PRDCTO_CMPRDO 
+		WHERE usuario_id=%s 
+  		ORDER BY fecha DESC
+		LIMIT 3
+		""", (sessionF['usuario_id'],))
+    
+    return render_template('perfil.html', usuario=sessionF, compras=compras_realizadas)
 
 
 @app.route('/Carrito', methods=['GET', 'POST'])
@@ -240,12 +247,18 @@ def pagar_carrito():
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         """, (carrito.usuario_id, recibo_id, carrito.carrito_id, pago_id, datestamp, carrito.monto, Metodo_pago(metodo_pago,correo), lista_productos))
         
-        
         session.execute("""
 			INSERT INTO CARRITO (usuario_id, carrito_id, fecha, monto, productos)
 			VALUES (%s, %s, %s, %s, %s)
 			""", (carrito.usuario_id, carrito_id, datestamp, 0, {}))
         
+        #inserta los produtos comprados       
+        for product in carrito.productos:
+            session.execute("""
+				INSERT INTO PRDCTO_CMPRDO (usuario_id, producto_id, fecha, nombre, precio, cantidad)
+				VALUES (%s, %s, %s, %s, %s, %s)
+    		""", (carrito.usuario_id, product.producto_id, datestamp, product.nombre,product.precio, product.cantidad))
+            
         SM.set(sessionF, 'carrito_id', carrito_id)
         session.execute("""
 			UPDATE USUARIO
