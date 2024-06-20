@@ -4,43 +4,35 @@
     <meta charset="UTF-8">
     <title>Productos Comprados</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/stylePerfil.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styleProductos.css') }}">
 </head>
 <body>
     <header class="navbar navbar-expand-lg navbar-dark bg-dark">
         {% include 'navbar.html' %}
         <div class="sidebar">
-            <a href="#" onclick="loadContent('Perfil')">Perfil</a>
-            <a href="#" onclick="loadContent('LSoportes')">Soportes</a>
-            <a href="#" onclick="loadContent('LRecibos')">Recibos</a>
+            <a href="{{ url_for('PComprados') }}">Productos Comprados</a>
+            <a href="{{ url_for('LSoportes') }}">Soportes</a>
+            <a href="{{ url_for('LRecibos') }}">Recibos</a>
         </div>
     </header>
-    <main class="container mt-5">
-        <div class="list-group mt-4" id="listaProductosComprados"></div>
+    <main class="content">
+        <div class="container mt-5">
+            <h2 class="mb-4">Productos Comprados</h2>
+            <div class="row">
+                {% for compra in compras %}
+                <div class="col-md-4">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ compra.nombre }}</h5>
+                            <p class="card-text">Precio: ${{ compra.precio }}</p>
+                            <p class="card-text">Cantidad: {{ compra.cantidad }}</p>
+                            <p class="card-text"><small class="text-muted">Fecha de compra: {{ compra.fecha }}</small></p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
     </main>
-    <script>
-        function loadContent(page) {
-            window.location.href = '/' + page;
-        }
-
-        function cargarProductosComprados() {
-            const listaProductosComprados = document.getElementById('listaProductosComprados');
-            const productosComprados = JSON.parse(localStorage.getItem('productosComprados')) || [];
-
-            productosComprados.forEach(producto => {
-                const listItem = document.createElement('div');
-                listItem.className = 'list-group-item';
-                listItem.innerHTML = `
-                    <h5 class="mb-1">${producto.name}</h5>
-                    <p class="mb-1">Cantidad: ${producto.quantity}</p>
-                    <p class="mb-1">Precio(u): $${producto.price.toFixed(2)}</p>
-                    <small class="text-muted">Fecha de compra: ${producto.fecha}</small>
-                `;
-                listaProductosComprados.appendChild(listItem);
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', cargarProductosComprados);
-    </script>
 </body>
 </html>

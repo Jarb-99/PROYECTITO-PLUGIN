@@ -16,7 +16,7 @@ session = get_cassandra_session()
 #############################################
 # true/ false para activar la creacion de tablas en la base de datos
 # true = puede tardar un 1 minuto la cracion de las tablas   
-boolTables = True
+boolTables = False
 if boolTables:
 	deleteTables.deleteTables()
 	createTables.createTables()
@@ -274,15 +274,27 @@ def soporte():
 
 @app.route('/Logout')
 def logout():
-  	return render_template('login.html', usuario=sessionF)
+    SM.clear(sessionF)
+    return render_template('login.html', usuario=sessionF)
 
 @app.route('/PComprados')
 def PComprados():
-  	return render_template('productos-comprados.html', usuario=sessionF)
+    compras_realizadas = session.execute("""
+		SELECT * FROM PRDCTO_CMPRDO 
+		WHERE usuario_id=%s 
+  		ORDER BY fecha DESC
+		""", (sessionF['usuario_id'],))
+    
+    return render_template('productos-comprados.html', usuario=sessionF, compras=compras_realizadas)
 
 @app.route('/LSoportes')
 def LSoportes():
-  	return render_template('lista-soportes.html', usuario=sessionF)
+	lista_soportes = session.execute("""
+		SELECT * FROM soporte 
+		WHERE usuario_id=%s ALLOW FILTERING
+		""", (sessionF['usuario_id'],))
+	
+	return render_template('lista-soportes.html', usuario=sessionF,soportes=lista_soportes)
 
 
 @app.route('/LRecibos')

@@ -4,42 +4,41 @@
     <meta charset="UTF-8">
     <title>Lista de Soportes</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/stylePerfil.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styleSoportes.css') }}">
 </head>
 <body>
     <header class="navbar navbar-expand-lg navbar-dark bg-dark">
         {% include 'navbar.html' %}
         <div class="sidebar">
-            <a href="#" onclick="loadContent('Perfil')">Perfil</a>
-            <a href="#" onclick="loadContent('PComprados')">Productos Comprados</a>
-            <a href="#" onclick="loadContent('LRecibos')">Recibos</a>
+            <a href="{{ url_for('PComprados') }}">Productos Comprados</a>
+            <a href="{{ url_for('LSoportes') }}">Soportes</a>
+            <a href="{{ url_for('LRecibos') }}">Recibos</a>
         </div>
     </header>
-    <main class="container mt-5">
-        <div class="list-group mt-4" id="soportesList">
-            <!-- Los elementos de soporte serán añadidos aquí -->
-        </div>
-    </main>
-    <script>
-        function loadContent(page) {
-            window.location.href = '/' + page;
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const soportesList = document.getElementById('soportesList');
-            const soportes = JSON.parse(localStorage.getItem('soportes')) || [];
-
-            soportes.forEach(soporte => {
-                const soporteItem = document.createElement('div');
-                soporteItem.classList.add('list-group-item');
-                soporteItem.innerHTML = `
-                    <h5 class="mb-1">Soporte</h5>
-                    <p class="mb-1">${soporte.mensaje}</p>
-                    <small class="text-muted">Fecha del soporte: ${soporte.fecha}</small>
-                `;
-                soportesList.appendChild(soporteItem);
-            });
-        });
-    </script>
+    <div class="content">
+        <main class="container mt-5">
+            <h1>Lista de Soportes</h1>
+            <div class="list-group mt-4" id="soportesList">
+                {% for soporte in soportes %}
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Soporte ID: {{ soporte.soporte_id }}</h5>
+                        <p class="card-text">Fecha: {{ soporte.fecha }}</p>
+                        <p class="card-text">Mensaje: {{ soporte.mensaje }}</p>
+                        <h6>Respuestas:</h6>
+                        <ul class="list-group">
+                            {% for timestamp, respuesta in soporte.respuestas.items() %}
+                            <li class="list-group-item">
+                                <strong>{{ respuesta.nombre_creador }}:</strong> {{ respuesta.mensaje }}
+                                <br><small>{{ timestamp }}</small>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </main>
+    </div>
 </body>
 </html>

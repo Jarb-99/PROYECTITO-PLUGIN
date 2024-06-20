@@ -4,43 +4,43 @@
     <meta charset="UTF-8">
     <title>Recibos</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/stylePerfil.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styleRecibos.css') }}">
 </head>
 <body>
     <header class="navbar navbar-expand-lg navbar-dark bg-dark">
         {% include 'navbar.html' %}
         <div class="sidebar">
-            <a href="#" onclick="loadContent('Perfil')">Perfil</a>
-            <a href="#" onclick="loadContent('PComprados')">Productos Comprados</a>
-            <a href="#" onclick="loadContent('LSoportes')">Soportes</a>
+            <div class="conteiner">
+            <a href="{{ url_for('PComprados') }}">Productos Comprados</a>
+            <a href="{{ url_for('LSoportes') }}">Soportes</a>
+            <a href="{{ url_for('LRecibos') }}">Recibos</a>
         </div>
     </header>
+    <div class="content">
     <main class="container mt-5">
-        <div class="list-group mt-4" id="listaRecibos"></div>
+        <h5 class="card-title">Lista de Recibos</h5>
+        {% for recibo in recibos %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title"><strong>Id del Recibo: {{ recibo.recibo_id }}</strong></h5>
+                <p class="card-text">Fecha: <strong>{{ recibo.fecha }}</strong></p>
+                <p class="card-text">Método de Pago: <strong>{{ recibo.metodo.nombre }}: {{ recibo.metodo.descripcion }}</strong></p>
+                <ul class="list-group mb-4">
+                    {% for producto in recibo.productos %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="my-0">{{ producto.nombre }}</h6>
+                            <small class="text-muted">Cantidad: {{ producto.cantidad }}</small>
+                        </div>
+                        <span class="text-muted">${{ producto.precio }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <h3>Total: $<span>{{ recibo.monto }}</span></h3>
+            </div>
+        </div>
+        {% endfor %}
     </main>
-    <script>
-        function loadContent(page) {
-            window.location.href = '/' + page;
-        }
-
-        function cargarRecibos() {
-            const listaRecibos = document.getElementById('listaRecibos');
-            const recibos = JSON.parse(localStorage.getItem('recibos')) || [];
-
-            recibos.forEach((recibo, index) => {
-                const listItem = document.createElement('div');
-                listItem.className = 'list-group-item';
-                listItem.innerHTML = `
-                    <h5 class="mb-1">Recibo ${index + 1}</h5>
-                    <p class="mb-1">Total: $${recibo.total}</p>
-                    <p class="mb-1">Método de Pago: ${recibo.metodoPago}</p>
-                    <small class="text-muted">Fecha del recibo: ${recibo.fecha}</small>
-                `;
-                listaRecibos.appendChild(listItem);
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', cargarRecibos);
-    </script>
+    </div>
 </body>
 </html>
