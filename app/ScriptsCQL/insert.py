@@ -72,7 +72,7 @@ def generateDatas(dh, produ, start_index, hilo):
         """, (usuario_id, carrito_id, nombre_usuario, fake.last_name(), fake.email(), password, fake.date_this_year(), fake.image_url(), fake.street_address(), fake.phone_number()))
         
         # Generar datos de propietarios (Solo uno)
-        if start_index == 0:
+        if start_index == 0 and i == 0:
             session.execute("""
                 INSERT INTO PROPIETARIO (administrador_id, usuario_id, nombre_usuario)
                 VALUES (%s, %s, %s)
