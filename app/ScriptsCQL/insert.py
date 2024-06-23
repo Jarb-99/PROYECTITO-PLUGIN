@@ -1,102 +1,75 @@
 from UDTs import *
 from uuid import uuid4
+from faker import Faker
 from datetime import datetime, date
 from connection import get_cassandra_session
 
 def insertDatas():
     session = get_cassandra_session()
-    # Definir UUIDs
-    usuario1_id = uuid4()
-    usuario2_id = uuid4()
-    usuario3_id = uuid4()
-
-    producto1_id = uuid4()
-    producto2_id = uuid4()
-    producto3_id = uuid4()
-
-    soporte1_id = uuid4()
-    soporte2_id = uuid4()
-    soporte3_id = uuid4()
-
-    carrito1_id = uuid4()
-    carrito2_id = uuid4()
-    carrito3_id = uuid4()
-
-    pago1_id = uuid4()
-    pago2_id = uuid4()
-    pago3_id = uuid4()
-
-    recibo1_id = uuid4()
-    recibo2_id = uuid4()
-    recibo3_id = uuid4()
-
+    fake = Faker()
+    
+    usuarios = []
+    propietarios = []
+    soportes = []
+    productos = []
+    carritos = []
+    pagos = []
+    recibos = []
+    productos_comprados = []
+    comentarios_productos = []
+    valoraciones_productos = []
+    
     propietario1_id = uuid4()
 
-    # Datos de prueba
-    usuarios = [
-        (usuario1_id, carrito1_id, 'Juan', 'Perez', 'juan.perez@example.com', 'password123', date(2023, 1, 1), 'foto1.jpg', 'Calle Falsa 123', '1234567890'),
-        (usuario2_id, carrito2_id, 'Maria', 'Gomez', 'maria.gomez@example.com', 'password123', date(2023, 1, 2), 'foto2.jpg', 'Avenida Siempre Viva 456', '0987654321'),
-        (usuario3_id, carrito3_id, 'Pedro', 'Lopez', 'pedro.lopez@example.com', 'password123', date(2023, 1, 3), 'foto3.jpg', 'Boulevard de los Sueños 789', '1122334455')
-    ]
+    for i in range(1000):
+        usuario_id = uuid4()
+        carrito_id = uuid4()
+        producto_id = uuid4()
+        soporte_id = uuid4()
+        pago_id = uuid4()
+        recibo_id = uuid4()
+        
+        # Generar password fake
+        password = fake.password(length=10, special_chars=True, digits=True, upper_case=True, lower_case=True)
 
-    propietarios = [
-        (propietario1_id, usuario1_id, 'juan.perez')
-    ]
-
+        # Generar datos de usuarios
+        usuarios.append((usuario_id, carrito_id, fake.first_name(), fake.last_name(), fake.email(), password, fake.date_this_year(), fake.image_url(), fake.street_address(), fake.phone_number()))
+        
+        # Generar datos de propietarios (uno por cada 10 usuarios, por ejemplo)
+        if i % 10 == 0:
+            propietarios.append((propietario1_id, usuario_id, fake.user_name()))
+        
+        # Generar datos de soporte
+        soportes.append((usuario_id, soporte_id, fake.date_this_year(), fake.sentence(), {fake.date_this_year(): Respuesta(propietario1_id, fake.sentence(), fake.user_name())}))
+        
+        # Generar datos de productos (3 por ejemplo)
+        if i < 3: 
+            productos.append((producto_id, fake.word(), fake.sentence(), round(fake.random_number(digits=2), 2), fake.date_this_year(), fake.random_int(min=1, max=5), fake.random_int(min=1, max=100), f'v{fake.random_digit()}', [Plugin(fake.random_element(elements=('1.0', '2.0', '3.0')))], [Schematic(fake.random_int(min=10, max=50))]))
+        
+        # Generar datos de carritos
+        carritos.append((usuario_id, carrito_id, fake.date_this_year(), round(fake.random_number(digits=3), 2), {Prdcto_anddo(producto_id, fake.word(), round(fake.random_number(digits=2), 2), round(fake.random_number(digits=2), 2), fake.random_int(min=1, max=10))}))
+        
+        # Generar datos de pagos
+        pagos.append((usuario_id, pago_id, carrito_id, fake.date_this_year(), round(fake.random_number(digits=3), 2), Metodo_pago(fake.random_element(elements=('Tarjeta de Crédito', 'PayPal', 'Efectivo')), fake.sentence())))
+        
+        # Generar datos de recibos
+        recibos.append((usuario_id, recibo_id, carrito_id, pago_id, fake.date_this_year(), round(fake.random_number(digits=3), 2), Metodo_pago(fake.random_element(elements=('Tarjeta de Crédito', 'PayPal', 'Efectivo')), fake.sentence()), {Prdcto_anddo(producto_id, fake.word(), round(fake.random_number(digits=2), 2), round(fake.random_number(digits=2), 2), fake.random_int(min=1, max=10))}))
+        
+        # Generar datos de productos comprados
+        productos_comprados.append((usuario_id, producto_id, fake.date_this_year(), fake.word(), round(fake.random_number(digits=2), 2), fake.random_int(min=1, max=10)))
+        
+        # Generar datos de comentarios de productos
+        comentarios_productos.append((producto_id, usuario_id, fake.date_this_year(), fake.user_name(), fake.sentence()))
+        
+        # Generar datos de valoraciones de productos
+        valoraciones_productos.append((producto_id, usuario_id, fake.date_this_year(), fake.random_int(min=1, max=5)))
+    
     session.user_type_registered(keyspace, 'respuesta', Respuesta)
-    soportes = [
-        (usuario1_id, soporte1_id, datetime(2023, 1, 1), 'Mensaje de soporte 1', {datetime(2023, 1, 1): Respuesta(propietario1_id, 'Respuesta 1', 'juan.perez')}),
-        (usuario2_id, soporte2_id, datetime(2023, 1, 2), 'Mensaje de soporte 2', {datetime(2023, 1, 2): Respuesta(propietario1_id, 'Respuesta 2', 'juan.perez')}),
-        (usuario3_id, soporte3_id, datetime(2023, 1, 3), 'Mensaje de soporte 3', {datetime(2023, 1, 3): Respuesta(usuario3_id, 'Respuesta 3', 'pedro')})
-    ]
-
     session.user_type_registered(keyspace, 'plugin', Plugin)
     session.user_type_registered(keyspace, 'schematic', Schematic)
-    productos = [
-        (producto1_id, 'Producto 1', 'Descripción del producto 1', 100.0, date(2023, 1, 1), 5, 10, 'v1', [Plugin('1.0')], []),
-        (producto2_id, 'Producto 2', 'Descripción del producto 2', 200.0, date(2023, 1, 2), 4, 20, 'v1', [], [Schematic(20)]),
-        (producto3_id, 'Producto 3', 'Descripción del producto 3', 300.0, date(2023, 1, 3), 3, 30, 'v3', [Plugin('3.0')], [Schematic(30)])
-    ]
-
     session.user_type_registered(keyspace, 'prdcto_anddo', Prdcto_anddo)
-    carritos = [
-        (usuario1_id, carrito1_id, date(2023, 1, 1), 400.0, {Prdcto_anddo(producto1_id, 'Producto 1', 100.0, 200.0, 2)}),
-        (usuario2_id, carrito2_id, date(2023, 1, 2), 200.0, {Prdcto_anddo(producto2_id, 'Producto 2', 200.0, 200.0, 1)}),
-        (usuario3_id, carrito3_id, date(2023, 1, 3), 300.0, {Prdcto_anddo(producto3_id, 'Producto 3', 300.0, 300.0, 1)})
-    ]
-
     session.user_type_registered(keyspace, 'metodo_pago', Metodo_pago)
-    pagos = [
-        (usuario1_id, pago1_id, carrito1_id, date(2023, 1, 1), 400.0, Metodo_pago('Tarjeta de Crédito', 'Pago con tarjeta de crédito')),
-        (usuario2_id, pago2_id, carrito2_id, date(2023, 1, 2), 200.0, Metodo_pago('PayPal', 'Pago con PayPal')),
-        (usuario3_id, pago3_id, carrito3_id, date(2023, 1, 3), 300.0, Metodo_pago('Efectivo', 'Pago en efectivo'))
-    ]
-
-
-    recibos = [
-        (usuario1_id, recibo1_id, carrito1_id, pago1_id, date(2023, 1, 1), 400.0, Metodo_pago('Tarjeta de Crédito', 'Pago con tarjeta de crédito'), {Prdcto_anddo(producto1_id, 'Producto 1', 100.0, 200.0, 2)}),
-        (usuario2_id, recibo2_id, carrito2_id, pago2_id, date(2023, 1, 2), 200.0, Metodo_pago('PayPal', 'Pago con PayPal'), {Prdcto_anddo(producto2_id, 'Producto 2', 200.0, 200.0, 1)}),
-        (usuario3_id, recibo3_id, carrito3_id, pago3_id, date(2023, 1, 3), 300.0, Metodo_pago('Paypal', 'Pago con PayPal'), {Prdcto_anddo(producto3_id, 'Producto 3', 300.0, 300.0, 1)})
-    ]
-
-    productos_comprados = [
-        (usuario1_id, producto1_id, date(2023, 1, 1), 'Producto 1',100, 2),
-        (usuario2_id, producto2_id, date(2023, 1, 2), 'Producto 2',200, 1),
-        (usuario3_id, producto3_id, date(2023, 1, 3), 'Producto 3',300, 1)
-    ]
-
-    comentarios_productos = [
-        (producto1_id, usuario1_id, date(2023, 1, 1), 'juan.perez', 'Buen producto'),
-        (producto2_id, usuario2_id, date(2023, 1, 2), 'maria.gomez', 'Producto regular'),
-        (producto3_id, usuario3_id, date(2023, 1, 3), 'pedro.lopez', 'Excelente producto')
-    ]
-
-    valoraciones_productos = [
-        (producto1_id, usuario1_id, date(2023, 1, 1), 5),
-        (producto2_id, usuario2_id, date(2023, 1, 2), 4),
-        (producto3_id, usuario3_id, date(2023, 1, 3), 3)
-    ]
-
+    
     # Insertar datos en la tabla USUARIO
     for usuario in usuarios:
         session.execute("""
@@ -166,3 +139,7 @@ def insertDatas():
             INSERT INTO VALORAR_PRODUCTO (producto_id, usuario_id, fecha, estrellas)
             VALUES (%s, %s, %s, %s)
         """, valoracion_producto)
+    
+    print("Datos generados e insertados en la base de datos.")
+
+insertDatas()
