@@ -131,11 +131,11 @@ def generateDatas(dh, produ, start_index, hilo):
 
     
 
-def insertDatas():
+def insertDatas(d_ = 15000,p_ = 100):
     h = 120  #cantidad de hilos [cassandra thead limit max:128]
-    d = 15000 #cantidad de datos
+    d = d_ #cantidad de datos
     dh = int(math.ceil(d/h)) #datos por hilo
-    p = 100 #cantidad de productos
+    p = p_ #cantidad de productos
     produ = int(math.ceil(p/h)) #cantidad productos por hilo
     
     ##Generar Hilos

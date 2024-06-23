@@ -16,18 +16,20 @@ session = get_cassandra_session()
 #############################################
 # true/ false para activar la creacion de tablas en la base de datos
 # true = puede tardar un 1 minuto la cracion de las tablas   
-boolTables = True
+boolTables = False
 if boolTables:
-	deleteTables.deleteTables()
-	createTables.createTables()
-	insert.insertDatas()  
+    d = 15000 # cantidad de datos
+    p = 100 # cantidad de productos
+    deleteTables.deleteTables()
+    createTables.createTables()
+    insert.insertDatas(d,p)  
 
 #############################################
 # global de productos para ahorrar las consultas por usuarios
 productos = session.execute("""
 		SELECT * FROM producto
 		""")
-lista_productos = [producto._asdict() for producto in productos]
+lista_productos = {producto.producto_id:producto._asdict() for producto in productos}
 
 #############################################
 # Views/Urls
@@ -74,7 +76,7 @@ def register():
 		contrasena = request.form['password']
 		
 		usuario = session.execute("""
-		SELECT * FROM usuario 
+		SELECT correo FROM usuario 
 		WHERE correo=%s AND contrasena=%s ALLOW FILTERING
 		""", ( correo, contrasena )).one()
 
@@ -117,6 +119,31 @@ def perfil():
     
     return render_template('perfil.html', usuario=sessionF, compras=compras_realizadas)
 
+@app.route('/Perfil/editar', methods=['POST'])
+def editar_perfil():
+    nombre = request.form.get('nombre')
+    apellido = request.form.get('apellido')
+    correo = request.form.get('correo')
+    contrasena = request.form.get('contrasena')
+    telefono = request.form.get('telefono')
+    direccion = request.form.get('direccion')
+    
+    SM.set(sessionF, 'nombre', nombre)
+    SM.set(sessionF, 'apellido', apellido)
+    SM.set(sessionF, 'correo', correo)
+    SM.set(sessionF, 'contrasena', contrasena)
+    SM.set(sessionF, 'telefono', telefono)
+    SM.set(sessionF, 'direccion', direccion)
+    
+    session.execute("""
+		UPDATE USUARIO
+		SET nombre=%s, apellido=%s, correo=%s, contrasena=%s, telefono=%s, direccion=%s
+		WHERE usuario_id=%s
+		""", (nombre, apellido, correo, contrasena, telefono, direccion, sessionF['usuario_id']))
+    
+    
+    return redirect(url_for('perfil'))
+
 
 @app.route('/Carrito', methods=['GET', 'POST'])
 def carrito():
@@ -152,19 +179,23 @@ def carrito():
 def editar_producto_carrito():
     
     if request.method == 'POST':
-        carrito = session.execute("""
-			SELECT * FROM carrito 
-			WHERE carrito_id=%s ALLOW FILTERING
-			""", (sessionF['carrito_id'],)).one()
-        
-        producto_id = UUID(request.form['producto_id'])
         nueva_cantidad = int(request.form['nuevacantidad'])
         cantidad = int(request.form['cantidad'])
+        
+        if cantidad == 1 and nueva_cantidad == 1:
+            return redirect(url_for('carrito'))
+        
+        producto_id = UUID(request.form['producto_id'])
         precio = float(request.form['precio'])
         nombre = request.form['nombre']
         actual_monto = float(request.form['monto'])
         monto = nueva_cantidad*precio
         old_monto = cantidad*precio
+        
+        carrito = session.execute("""
+			SELECT * FROM carrito 
+			WHERE carrito_id=%s ALLOW FILTERING
+			""", (sessionF['carrito_id'],)).one()
         
         session.user_type_registered(keyspace, 'prdcto_anddo', Prdcto_anddo)
         
@@ -240,12 +271,12 @@ def pagar_carrito():
         """, 
         (carrito.usuario_id, pago_id, carrito.carrito_id, datestamp, carrito.monto, Metodo_pago(metodo_pago,correo)))
         
-        lista_productos = {Prdcto_anddo(producto.producto_id, producto.nombre, producto.precio, producto.monto, producto.cantidad) for producto in carrito.productos}
+        lista_productos_andddo = {Prdcto_anddo(producto.producto_id, producto.nombre, producto.precio, producto.monto, producto.cantidad) for producto in carrito.productos}
         
         session.execute("""
             INSERT INTO RECIBO (usuario_id, recibo_id, carrito_id, pago_id, fecha, monto, metodo, productos)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-        """, (carrito.usuario_id, recibo_id, carrito.carrito_id, pago_id, datestamp, carrito.monto, Metodo_pago(metodo_pago,correo), lista_productos))
+        """, (carrito.usuario_id, recibo_id, carrito.carrito_id, pago_id, datestamp, carrito.monto, Metodo_pago(metodo_pago,correo), lista_productos_andddo))
         
         session.execute("""
 			INSERT INTO CARRITO (usuario_id, carrito_id, fecha, monto, productos)
@@ -259,12 +290,26 @@ def pagar_carrito():
 				VALUES (%s, %s, %s, %s, %s, %s)
     		""", (carrito.usuario_id, product.producto_id, datestamp, product.nombre,product.precio, product.cantidad))
             
+            num_compras = session.execute("""
+				SELECT compras,fecha FROM PRODUCTO
+				WHERE producto_id=%s 
+				""", (product.producto_id, )).one()
+            
+            session.execute("""
+				UPDATE PRODUCTO
+				SET compras=%s
+				WHERE producto_id=%s AND fecha=%s 
+				""", (num_compras.compras + product.cantidad, product.producto_id, num_compras.fecha))
+            
+            lista_productos[product.producto_id]['compras'] =  num_compras.compras + product.cantidad
+   
         SM.set(sessionF, 'carrito_id', carrito_id)
         session.execute("""
 			UPDATE USUARIO
    			SET carrito_id=%s
 			WHERE usuario_id=%s
 			""", (carrito_id, carrito.usuario_id))
+        
         
     return redirect(url_for('recibo'))
 
@@ -319,7 +364,7 @@ def recibo():
 		ORDER BY fecha DESC 
 		LIMIT 1
 	""", (sessionF['usuario_id'], )).one()
-    print(recibo_reciente)
+
     return render_template('recibo.html', usuario=sessionF, recibo=recibo_reciente)
 
 
@@ -337,10 +382,10 @@ def producto(producto_id):
     lista_comentarios = [comentario._asdict() for comentario in comentario_producto]
  
     if not producto:
-        return redirect(url_for('index'))
+        return redirect(url_for('perfil'))
 
     return render_template('producto.html', producto=producto, usuario=sessionF, lista_comentarios=lista_comentarios)
 
 
 if __name__ == '__main__':
-	app.run(host='localhost', port=8080, debug=False)
+	app.run(host='localhost', port=8080, debug=True)

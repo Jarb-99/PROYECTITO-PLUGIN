@@ -18,7 +18,7 @@
         <div class="row">
                         
             <!-- Añadir más productos según sea necesario -->
-            {% for producto in productos %}
+            {% for producto_id, producto in productos.items() %}
                 <div class="col-md-4">
                     <div class="card mb-4 shadow-sm">
                         <img src="https://via.placeholder.com/300" class="card-img-top" alt="{{ producto.nombre }}">
