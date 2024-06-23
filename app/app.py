@@ -16,7 +16,7 @@ session = get_cassandra_session()
 #############################################
 # true/ false para activar la creacion de tablas en la base de datos
 # true = puede tardar un 1 minuto la cracion de las tablas   
-boolTables = False
+boolTables = True
 if boolTables:
 	deleteTables.deleteTables()
 	createTables.createTables()
@@ -343,4 +343,4 @@ def producto(producto_id):
 
 
 if __name__ == '__main__':
-	app.run(host='localhost', port=8080, debug=True)
+	app.run(host='localhost', port=8080, debug=False)

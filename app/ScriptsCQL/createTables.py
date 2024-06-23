@@ -13,7 +13,7 @@ def createTables():
         cantidad INT
     );
     """)
-
+    
     session.execute("""
     CREATE TYPE IF NOT EXISTS METODO_PAGO (
         nombre TEXT,
