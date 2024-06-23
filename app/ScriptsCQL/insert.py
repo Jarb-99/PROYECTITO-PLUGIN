@@ -11,7 +11,7 @@ lock = threading.RLock()
 
 def uuids(n):
     time.sleep(0.1)
-    with lock:
+    with lock: #agregado para evitar que uuid4() se duplique el mismo valor
         list_uuid = []
         for i in range(n):
             list_uuid.append(uuid4())
@@ -135,7 +135,7 @@ def insertDatas():
     h = 120  #cantidad de hilos [cassandra thead limit max:128]
     d = 15000 #cantidad de datos
     dh = int(math.ceil(d/h)) #datos por hilo
-    produ = dh #cantidad productos
+    produ = dh #cantidad productos por hilo
     
     ##Generar Hilos
     threads = []
