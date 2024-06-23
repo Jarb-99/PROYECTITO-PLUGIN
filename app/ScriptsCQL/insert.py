@@ -18,7 +18,7 @@ def uuids(n):
     return list_uuid
 
 def generateDatas(dh, produ, start_index, hilo):
-    print(f"Empezando: Datos {hilo}")
+    print(f"Empezando: hilo {hilo}")
     time.sleep(1)
     session = get_cassandra_session()
     fake = Faker()
@@ -48,7 +48,7 @@ def generateDatas(dh, produ, start_index, hilo):
         respuesta_soporte = {fake.date_this_year(): Respuesta(usuario_id, fake.sentence(), nombre_usuario)}
         
         precio_producto = round(fake.random_number(digits=2), 2)
-        nombre_producto = f"Producto {start_index+i+1}"
+        nombre_producto = f"Producto {produ*hilo+i+1}"
         valoracion_producto = fake.random_int(min=1, max=5)
         compras_producto = fake.random_int(min=1, max=100)
         
@@ -125,9 +125,9 @@ def generateDatas(dh, produ, start_index, hilo):
         session.execute("""
             INSERT INTO VALORAR_PRODUCTO (producto_id, usuario_id, fecha, estrellas)
             VALUES (%s, %s, %s, %s)
-        """, (producto_id, usuario_id, fake.date_this_year(), fake.random_int(min=1, max=5)))
+        """, (producto_id, usuario_id, fake.date_this_year(), valoracion_producto))
     
-    print(f" Datos {hilo} generados e insertados en la base de datos.")
+    print(f" Datos del hilo {hilo} generados e insertados en la base de datos.")
 
     
 
@@ -135,7 +135,8 @@ def insertDatas():
     h = 120  #cantidad de hilos [cassandra thead limit max:128]
     d = 15000 #cantidad de datos
     dh = int(math.ceil(d/h)) #datos por hilo
-    produ = dh #cantidad productos por hilo
+    p = 100 #cantidad de productos
+    produ = int(math.ceil(p/h)) #cantidad productos por hilo
     
     ##Generar Hilos
     threads = []
