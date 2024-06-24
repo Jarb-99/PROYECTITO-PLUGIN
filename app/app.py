@@ -217,9 +217,9 @@ def editar_producto_carrito():
         producto_id = UUID(request.form['producto_id'])
         precio = float(request.form['precio'])
         nombre = request.form['nombre']
-        actual_monto = float(request.form['monto'])
-        monto = nueva_cantidad*precio
-        old_monto = cantidad*precio
+        actual_monto_producto = float(request.form['producto_monto'])
+        carrito_monto = float(request.form['carrito_monto'])
+        nuevo_monto_producto = nueva_cantidad*precio
         
         carrito = session.execute("""
 			SELECT * FROM carrito 
@@ -233,9 +233,9 @@ def editar_producto_carrito():
             SET productos = productos -  %s, productos = productos  +  %s, monto = %s 
             WHERE carrito_id = %s AND usuario_id = %s AND fecha = %s
         """, (
-            {Prdcto_anddo(producto_id, nombre, precio, old_monto, cantidad)},
-            {Prdcto_anddo(producto_id, nombre, precio, monto, nueva_cantidad)},
-            actual_monto - old_monto + monto,
+            {Prdcto_anddo(producto_id, nombre, precio, actual_monto_producto, cantidad)},
+            {Prdcto_anddo(producto_id, nombre, precio, nuevo_monto_producto, nueva_cantidad)},
+            carrito_monto - actual_monto_producto + nuevo_monto_producto,
             carrito.carrito_id,
             carrito.usuario_id,
             carrito.fecha
@@ -252,11 +252,11 @@ def eliminar_producto_carrito():
 			""", (sessionF['carrito_id'],)).one()
         
         producto_id = UUID(request.form['producto_id'])	
-        cantidad = int(request.form['cantidad'])
         precio = float(request.form['precio'])
         nombre = request.form['nombre']
-        actual_monto = float(request.form['monto'])
-        old_monto = cantidad*precio
+        cantidad = int(request.form['cantidad'])
+        producto_monto = float(request.form['producto_monto'])
+        carrito_monto = float(request.form['carrito_monto'])
         
         session.user_type_registered(keyspace, 'prdcto_anddo', Prdcto_anddo)
         
@@ -265,8 +265,8 @@ def eliminar_producto_carrito():
 			SET productos = productos - %s, monto = %s 
 			WHERE carrito_id = %s AND usuario_id = %s AND fecha = %s
 		""", (
-		{Prdcto_anddo(producto_id, nombre, precio, old_monto, cantidad)},
-		actual_monto -  old_monto,
+		{Prdcto_anddo(producto_id, nombre, precio, producto_monto, cantidad)},
+		carrito_monto -  producto_monto,
 		carrito.carrito_id,
 		carrito.usuario_id,
 		carrito.fecha
