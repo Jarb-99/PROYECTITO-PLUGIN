@@ -8,6 +8,7 @@ from uuid import uuid4, UUID
 from datetime import datetime, date
 from UDTs import *
 import json
+from collections import OrderedDict
 
 app = Flask(__name__)
 app.secret_key = 'secret_key'
@@ -16,7 +17,7 @@ session = get_cassandra_session()
 #############################################
 # true/ false para activar la creacion de tablas en la base de datos
 # true = puede tardar un 1 minuto la cracion de las tablas   
-boolTables = True
+boolTables = False
 if boolTables:
     d = 100 # cantidad de datos
     p = d # cantidad de productos
@@ -27,11 +28,11 @@ if boolTables:
 #############################################
 # global de productos para ahorrar las consultas por usuarios
 
-lista_productos = {producto.producto_id:producto._asdict() for producto in 
+lista_productos = OrderedDict(sorted({producto.producto_id:producto._asdict() for producto in 
                    session.execute("""
 						SELECT * FROM producto
 						""")
-                   }
+                   }.items(), key=lambda x: x[1]['fecha'], reverse=True))
 
 #############################################
 # Views/Urls
@@ -62,28 +63,37 @@ def buscar_producto():
 
 @app.route('/login', methods=['GET','POST'])
 def login():
-	if request.method == 'POST':
-		correo = request.form['email']
-		contrasena = request.form['password']
-		
-		usuario = session.execute("""
+    if request.method == 'POST':
+        correo = request.form['email']
+        contrasena = request.form['password']
+        
+        usuario = session.execute("""
 		SELECT * FROM usuario 
 		WHERE correo=%s AND contrasena=%s ALLOW FILTERING
 		""", ( correo, contrasena )).one()
-
-		if usuario:
-			if usuario.contrasena == contrasena:
-				SM.set_usuario_dict(sessionF, usuario._asdict())
-
-				return redirect(url_for('index'))
-			else:
-				flash('Contraseña incorrecta', 'error')
-				return redirect('/login')
-		else:
-			flash('Usuario no registrado', 'error')
-			return redirect('/register')
-		
-	return render_template('login.html')
+    
+        if usuario:
+            if usuario.contrasena == contrasena:
+                SM.set_usuario_dict(sessionF, usuario._asdict())
+    
+                admin = session.execute("""
+				SELECT nombre_usuario FROM propietario 
+				WHERE usuario_id=%s ALLOW FILTERING
+				""", ( sessionF['usuario_id'], )).one()
+    
+                if admin:
+                    return redirect(url_for('index_admin'))
+    
+                return redirect(url_for('index'))
+    
+            else:
+                flash('Contraseña incorrecta', 'error')
+                return redirect('/login')
+        else:
+            flash('Usuario no registrado', 'error')
+            return redirect('/register')
+    
+    return render_template('login.html')
 
 @app.route('/register', methods=['GET','POST'])
 def register():
@@ -445,5 +455,199 @@ def producto(producto_id):
     return render_template('producto.html', producto=producto, usuario=sessionF, lista_comentarios=lista_comentarios)
 
 
+
+
+##############################################################
+##############################################################
+##							ADMIN							##
+##															##
+##############################################################
+##############################################################
+
+
+
+@app.route('/index/admin')
+def index_admin():
+        
+    return render_template('index_admin.html', usuario=sessionF, productos=lista_productos)
+
+@app.route('/index/admin/s', methods=['GET','POST'])
+def buscar_producto_admin():
+    if request.method == 'POST':
+        buscar = request.form['buscar'].lower()
+        
+        if buscar == '':
+            return redirect(url_for('index_admin'))
+        
+        lista_productos_buscados = {producto_id:producto 
+                                    for producto_id,producto in lista_productos.items() 
+                                    if buscar in producto['nombre'].lower()}
+        
+        return render_template('index_admin.html', usuario=sessionF, productos=lista_productos_buscados)
+    
+    return redirect(url_for('index_admin'))
+
+@app.route('/index/admin/add', methods=['POST'])
+def agregar_producto_admin():
+    if request.method == 'POST':
+        global lista_productos
+        nombre = request.form['nombre']
+        descripcion = request.form['descripcion']
+        precio = float(request.form['precio'])
+        version_comptble = request.form['version_comptble']
+        plugins = request.form.getlist('plugins[]')
+        schematics = request.form.getlist('schematics[]')
+        fecha = datetime.now()
+        producto_id = uuid4()
+
+        session.user_type_registered(keyspace, 'plugin', Plugin)
+        session.user_type_registered(keyspace, 'schematic', Schematic)
+    
+        plugins_list = [Plugin(version) for version in plugins]
+        schematics_list = [Schematic(int(dimensiones)) for dimensiones in schematics]
+    
+        session.execute("""
+        	INSERT INTO producto (producto_id, nombre, descripcion, precio, fecha, valoracion, compras, version_comptble, plugins, schematics)
+        	VALUES (%s, %s, %s, %s, %s, 0, 0, %s, %s, %s)
+    	""", (producto_id, nombre, descripcion, precio, fecha, version_comptble, plugins_list, schematics_list))
+
+        nuevo_producto = {
+            'producto_id': producto_id,
+            'nombre': nombre,
+            'descripcion': descripcion,
+            'precio': precio,
+            'fecha': fecha,
+            'valoracion': 0,
+            'compras': 0,
+            'version_comptble': version_comptble,
+            'plugins': plugins_list,
+            'schematics': schematics_list
+        }
+        lista_productos = OrderedDict([(producto_id, nuevo_producto)] + list(lista_productos.items()))
+        
+        
+    return render_template('index_admin.html', usuario=sessionF, productos=lista_productos)
+
+
+@app.route('/index/admin/edit', methods=['POST'])
+def editar_producto_admin():
+    
+    if request.method == 'POST':
+        accion = request.form.get('accion')
+        if 'confirmar' in accion:
+            nombre = request.form['nombre']
+            descripcion = request.form['descripcion']
+            precio = float(request.form['precio'])
+            version_comptble = request.form['version_comptble']
+            
+            fecha = request.form['fecha']
+            fecha = datetime.strptime(fecha, '%Y-%m-%d %H:%M:%S.%f')
+            producto_id = UUID(request.form['producto_id'])
+        
+            session.user_type_registered(keyspace, 'plugin', Plugin)
+            session.user_type_registered(keyspace, 'schematic', Schematic)
+        
+            session.execute("""
+				UPDATE PRODUCTO 
+				SET nombre=%s, descripcion=%s, precio=%s, version_comptble=%s 
+				WHERE producto_id = %s AND fecha = %s 
+			""", (nombre, descripcion, precio, version_comptble, producto_id, fecha))
+        
+            lista_productos[producto_id]['nombre'] = nombre
+            lista_productos[producto_id]['descripcion'] = descripcion
+            lista_productos[producto_id]['precio'] = precio
+            lista_productos[producto_id]['version_comptble'] = version_comptble
+        
+        elif 'eliminar' in accion:   
+            producto_id = UUID(request.form['producto_id'])	
+            fecha = request.form['fecha']
+            fecha = datetime.strptime(fecha, '%Y-%m-%d %H:%M:%S.%f')
+        
+            session.user_type_registered(keyspace, 'prdcto_anddo', Prdcto_anddo)
+        
+            session.execute("""
+				DELETE FROM PRODUCTO  
+				WHERE producto_id = %s AND fecha = %s
+			""", (producto_id, fecha))
+        
+            del lista_productos[producto_id]         
+
+    return redirect(url_for('index_admin'))
+
+@app.route('/index/admin/del', methods=['POST'])
+def eliminar_producto_admin():
+    if request.method == 'POST':       
+        producto_id = UUID(request.form['producto_id'])	
+        fecha = request.form['fecha']
+        fecha = datetime.strptime(fecha, '%Y-%m-%d %H:%M:%S.%f')
+        
+        session.user_type_registered(keyspace, 'prdcto_anddo', Prdcto_anddo)
+        
+        session.execute("""
+			DELETE FROM PRODUCTO  
+			WHERE producto_id = %s AND fecha = %s
+		""", (producto_id, fecha))
+        
+        del lista_productos[producto_id]
+        
+
+    return redirect(url_for('index_admin'))
+
+@app.route('/Perfil/admin')
+def perfil_admin():
+    compras_realizadas = session.execute("""
+		SELECT * FROM PRDCTO_CMPRDO 
+		WHERE usuario_id=%s 
+  		ORDER BY fecha DESC
+		LIMIT 3
+		""", (sessionF['usuario_id'],))
+    
+    return render_template('perfil_admin.html', usuario=sessionF, compras=compras_realizadas)
+
+@app.route('/Perfil/admin/editar', methods=['POST'])
+def editar_perfil_admin():
+    nombre = request.form.get('nombre')
+    apellido = request.form.get('apellido')
+    correo = request.form.get('correo')
+    contrasena = request.form.get('contrasena')
+    telefono = request.form.get('telefono')
+    direccion = request.form.get('direccion')
+    
+    SM.set(sessionF, 'nombre', nombre)
+    SM.set(sessionF, 'apellido', apellido)
+    SM.set(sessionF, 'correo', correo)
+    SM.set(sessionF, 'contrasena', contrasena)
+    SM.set(sessionF, 'telefono', telefono)
+    SM.set(sessionF, 'direccion', direccion)
+    
+    session.execute("""
+		UPDATE USUARIO
+		SET nombre=%s, apellido=%s, correo=%s, contrasena=%s, telefono=%s, direccion=%s
+		WHERE usuario_id=%s
+		""", (nombre, apellido, correo, contrasena, telefono, direccion, sessionF['usuario_id']))
+    
+    
+    return redirect(url_for('perfil_admin'))
+
+
+@app.route('/LSoportes/admin')
+def soporte_admin():
+	lista_soportes = session.execute("""
+		SELECT * FROM soporte 
+		WHERE usuario_id=%s
+  		ORDER BY fecha DESC
+		""", (sessionF['usuario_id'],))
+	
+	return render_template('soporte_admin.html', usuario=sessionF,soportes=lista_soportes)
+
+
+
+
+
+
+
+
+
+
 if __name__ == '__main__':
-	app.run(host='localhost', port=8080, debug=False)
+	app.run(host='localhost', port=8080, debug=True)

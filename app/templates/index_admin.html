@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styleIndexAdmin.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!-- Importar scipts Modal bootstrap para agregar un producto -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <header class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">Administradores</a>
+            <div class="navbar-nav">
+                <a class="nav-link" href="{{ url_for('index_admin') }}">Editar Productos</a>
+                <a class="nav-link" href="{{ url_for('perfil_admin') }}">Perfil( {{ usuario['nombre'] }} )</a>
+                <a class="nav-link" href="{{ url_for('soporte_admin') }}">Soporte</a>
+                <a class="nav-link" href="{{ url_for('logout') }}">Log out</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mt-5">
+        <h1 class="main-header">Editor de productos</h1>
+        
+        <div class="form-inline">
+            <form class="form-inline" method="POST" action="{{ url_for('buscar_producto_admin') }}">
+                <input class="form-control mr-sm-2" type="search" name="buscar" placeholder="Buscar productos" aria-label="Buscar">
+                <button class="btn btn-success mr-sm-2" type="submit">Buscar</button>
+            </form>
+
+            <button class="form-inline btn btn-warning" type="button" data-toggle="modal" data-target="#agregarModal">Agregar</button>   
+        </div>
+
+        <div class="row">
+            {% for producto_id, producto in productos.items() %}
+            <div class="col-md-4">
+                <div class="product-card">
+
+                    <form method="POST" action="{{ url_for('editar_producto_admin') }}">
+
+                        <h5><strong>Nombre: <span id="nombre-text-{{ producto_id }}">{{ producto['nombre'] }}</strong></span></h5>
+                        <input type="text" class="form-control mb-2" id="nombre-input-{{ producto_id }}" name="nombre" style="display:none;" value="{{ producto['nombre'] }}">
+
+                        <p><strong>Descripción:</strong> <span id="descripcion-text-{{ producto_id }}">{{ producto['descripcion'] }}</span></p>
+                        <textarea class="form-control mb-2" id="descripcion-input-{{ producto_id }}" name="descripcion" style="display:none;">{{ producto['descripcion'] }}</textarea>
+
+                        <p><strong>Precio:</strong> <span id="precio-text-{{ producto_id }}">{{ producto['precio'] }}</span></p>
+                        <input type="number" class="form-control mb-2" id="precio-input-{{ producto_id }}" name="precio" style="display:none;" value="{{ producto['precio'] }}">
+
+                        <p><strong>Fecha:</strong> {{ producto['fecha'] }}</p>
+                        <input type="hidden" name="fecha" value="{{ producto.fecha }}">
+
+                        <p><strong>Valoración:</strong> {{ producto['valoracion'] }}</p>
+                        <p><strong>Compras:</strong> {{ producto['compras'] }}</p>
+
+                        <input type="hidden" name="producto_id" value="{{ producto_id }}">
+
+                        <p><strong>Versión Compatible:</strong> <span id="version-text-{{ producto_id }}">{{ producto['version_comptble'] }}</span></p>
+                        <input type="text" class="form-control mb-2" id="version-input-{{ producto_id }}" name="version_comptble" style="display:none;" value="{{ producto['version_comptble'] }}">
+
+                        {% if producto.plugins %}
+                            <p class="card-text"><strong>Plugins:</strong>
+                                <ul>
+                                    {% for plugin in producto.plugins %}
+                                        <li>Versión: {{ plugin.version }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </p>
+                        {% endif %}
+                        {% if producto.schematics %}
+                            <p class="card-text"><strong>Schematics:</strong>
+                                <ul>
+                                    {% for schematic in producto.schematics %}
+                                        <li>Dimensiones: {{ schematic.dimensiones }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </p>
+                        {% endif %}
+
+                        <button type="button" class="btn btn-primary btn-sm" id="editar-btn-{{ producto_id }}" onclick="mostrarEdicion('{{ producto_id }}')">Editar</button>
+                        
+                        
+                        <button type="submit" class="btn btn-success btn-sm" name="accion" value="confirmar_{{ producto_id }}" id="subir-btn-{{ producto_id }}" style="display:none;">Confirmar</button>
+                        <button type="button" class="btn btn-secondary btn-sm" id="cancelar-btn-{{ producto_id }}" style="display:none;" onclick="cancelarEdicion('{{ producto_id }}')">Cancelar</button>
+                        
+                        
+                        <button type="submit" class="btn btn-danger btn-sm" name="accion" value="eliminar_{{ producto_id }}" id="eliminar-btn-{{ producto_id }}">Eliminar</button>
+
+
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+
+
+        <!-- Modal bootstrap para agregar un  producto -->
+        <div class="modal fade" id="agregarModal" tabindex="-1" role="dialog" aria-labelledby="agregarModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="agregarModalLabel">Agregar Producto</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form method="POST" action="{{ url_for('agregar_producto_admin') }}">
+
+                            <div class="form-group">
+                                <label for="nombre">Nombre</label>
+                                <input type="text" class="form-control" id="nombre" name="nombre" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="descripcion">Descripción</label>
+                                <textarea class="form-control" id="descripcion" name="descripcion" required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="precio">Precio</label>
+                                <input type="number" class="form-control" id="precio" name="precio" step="0.01" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="version_comptble">Versión Compatible</label>
+                                <input type="text" class="form-control" id="version_comptble" name="version_comptble" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="plugins">Plugins</label>
+                                <div id="plugins-list">
+
+                                </div>
+                                <button class="btn btn-primary" type="button" onclick="addPluginField()">Agregar Plugin</button>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="schematics">Schematics</label>
+                                <div id="schematics-list">
+
+                                </div>
+                                <button class="btn btn-primary" type="button" onclick="addSchematicField()">Agregar Schematic</button>
+                            </div>
+
+
+                            <button type="submit" class="btn btn-success">Guardar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+    function mostrarEdicion(productId) {
+        document.getElementById('nombre-text-' + productId).style.display = 'none';
+        document.getElementById('nombre-input-' + productId).style.display = 'block';
+
+        document.getElementById('descripcion-text-' + productId).style.display = 'none';
+        document.getElementById('descripcion-input-' + productId).style.display = 'block';
+
+        document.getElementById('precio-text-' + productId).style.display = 'none';
+        document.getElementById('precio-input-' + productId).style.display = 'block';
+
+        document.getElementById('version-text-' + productId).style.display = 'none';
+        document.getElementById('version-input-' + productId).style.display = 'block';
+
+        document.getElementById('editar-btn-' + productId).style.display = 'none';
+        document.getElementById('eliminar-btn-' + productId).style.display = 'none';
+        document.getElementById('subir-btn-' + productId).style.display = 'inline-block';
+        document.getElementById('cancelar-btn-' + productId).style.display = 'inline-block';
+    }
+
+    function cancelarEdicion(productId) {
+        document.getElementById('nombre-text-' + productId).style.display = 'inline';
+        document.getElementById('nombre-input-' + productId).style.display = 'none';
+
+        document.getElementById('descripcion-text-' + productId).style.display = 'inline';
+        document.getElementById('descripcion-input-' + productId).style.display = 'none';
+
+        document.getElementById('precio-text-' + productId).style.display = 'inline';
+        document.getElementById('precio-input-' + productId).style.display = 'none';
+
+        document.getElementById('version-text-' + productId).style.display = 'inline';
+        document.getElementById('version-input-' + productId).style.display = 'none';
+
+        document.getElementById('editar-btn-' + productId).style.display = 'inline-block';
+        document.getElementById('eliminar-btn-' + productId).style.display = 'inline-block';
+        document.getElementById('subir-btn-' + productId).style.display = 'none';
+        document.getElementById('cancelar-btn-' + productId).style.display = 'none';
+    }
+
+    function addPluginField() {
+        const pluginField = `
+            <div class="input-group mb-2">
+                <input type="text" class="form-control" name="plugins[]" placeholder="Versión del Plugin">
+                <div class="input-group-append">
+                    <button class="btn btn-danger" type="button" onclick="removeField(this)">Eliminar</button>
+                </div>
+            </div>`;
+        document.getElementById('plugins-list').insertAdjacentHTML('beforeend', pluginField);
+    }
+
+    function addSchematicField() {
+        const schematicField = `
+            <div class="input-group mb-2">
+                <input type="number" class="form-control" name="schematics[]" placeholder="Dimensiones del Schematic">
+                <div class="input-group-append">
+                    <button class="btn btn-danger" type="button" onclick="removeField(this)">Eliminar</button>
+                </div>
+            </div>`;
+        document.getElementById('schematics-list').insertAdjacentHTML('beforeend', schematicField);
+    }
+
+    function removeField(button) {
+        button.closest('.input-group').remove();
+    }
+    </script>
+</body>
+</html>
