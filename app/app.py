@@ -684,7 +684,42 @@ def eliminar_soporte_admin():
     
     return redirect(url_for('soporte_admin'))
 
-
+@app.route('/LSoportes/admin/s', methods=['GET','POST'])
+def buscar_soporte_admin():
+    if request.method == 'POST':
+        usuario_id = request.form['usuario_id']
+        soporte_id = request.form['soporte_id']
+        
+        lista_soportes_buscados = {}
+        
+        if usuario_id == '' and soporte_id == '':
+            return redirect(url_for('soporte_admin'))
+        elif soporte_id == '':
+            lista_soportes_buscados=OrderedDict({soporte.soporte_id:soporte._asdict() for soporte in 
+			session.execute("""
+				SELECT * FROM SOPORTE  
+				WHERE usuario_id = %s
+				ORDER BY fecha DESC
+			""", (UUID(usuario_id), ))}.items())
+        
+        elif usuario_id == '':
+            lista_soportes_buscados=OrderedDict({soporte.soporte_id:soporte._asdict() for soporte in 
+			session.execute("""
+				SELECT * FROM SOPORTE  
+				WHERE soporte_id = %s ALLOW FILTERING
+			""", (UUID(soporte_id), ))}.items())
+        else:
+            lista_soportes_buscados=OrderedDict({soporte.soporte_id:soporte._asdict() for soporte in 
+			session.execute("""
+				SELECT * FROM SOPORTE  
+				WHERE soporte_id = %s AND usuario_id = %s 
+				ORDER BY fecha DESC ALLOW FILTERING
+			""", (UUID(soporte_id), UUID(usuario_id)))}.items())
+            
+        
+        return render_template('soporte_admin.html', usuario=sessionF, soportes=lista_soportes_buscados)
+    
+    return redirect(url_for('soporte_admin'))
 
 
 if __name__ == '__main__':

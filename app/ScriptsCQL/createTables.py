@@ -69,11 +69,11 @@ def createTables():
     session.execute("""
     CREATE TABLE IF NOT EXISTS SOPORTE (
         usuario_id UUID,
-        soporte_id UUID,
         fecha TIMESTAMP,
+        soporte_id UUID,
         mensaje TEXT,
         respuestas MAP<TIMESTAMP, FROZEN<RESPUESTA>>,
-        PRIMARY KEY ((usuario_id), fecha, soporte_id)
+        PRIMARY KEY ((usuario_id), fecha)
     ) WITH CLUSTERING ORDER BY (fecha DESC);
     """)
 

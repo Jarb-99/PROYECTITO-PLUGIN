@@ -15,6 +15,13 @@
     <div class="content">
         <main class="container mt-2">
             <h1 class="main-header">Lista de Soportes</h1>
+            
+            <form class="form-inline mb-4 mt-4" method="POST" action="{{ url_for('buscar_soporte_admin') }}">
+                <input class="form-control mr-sm-2" type="search" name="usuario_id" placeholder="Buscar Id de usuario" aria-label="Buscar">
+                <input class="form-control mr-sm-2" type="search" name="soporte_id" placeholder="Buscar Id de soporte" aria-label="Buscar">
+                <button class="btn btn-success mr-sm-2" type="submit">Buscar</button>
+            </form>
+
             <div class="row" id="soportesList">
                 {% if soportes %}
                     {% for soporte_id,soporte in soportes.items() %}
