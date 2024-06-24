@@ -313,10 +313,26 @@ def pagar_carrito():
         
     return redirect(url_for('recibo'))
 
-@app.route('/Soporte')
+@app.route('/Soporte', methods=['GET', 'POST'])
 def soporte():
-  	return render_template('soporte.html', usuario=sessionF)
-
+    if request.method == 'POST':
+        mensaje = request.form.get('mensaje')
+        
+        if mensaje == ' ':
+            return redirect(url_for('index'))
+        
+        soporte_id = uuid4()
+        datestamp = datetime.now()
+        
+        session.execute("""
+            INSERT INTO SOPORTE (usuario_id, soporte_id, fecha, mensaje, respuestas)
+            VALUES (%s, %s, %s, %s, {})
+        """, (sessionF['usuario_id'], soporte_id, datestamp, mensaje))
+        
+        return redirect(url_for('LSoportes'))
+	
+    return render_template('soporte.html', usuario=sessionF)
+     
 @app.route('/Logout')
 def logout():
     SM.clear(sessionF)
@@ -336,11 +352,35 @@ def PComprados():
 def LSoportes():
 	lista_soportes = session.execute("""
 		SELECT * FROM soporte 
-		WHERE usuario_id=%s ALLOW FILTERING
+		WHERE usuario_id=%s
+  		ORDER BY fecha DESC
 		""", (sessionF['usuario_id'],))
 	
 	return render_template('lista-soportes.html', usuario=sessionF,soportes=lista_soportes)
 
+@app.route('/LSoportes/resp', methods=['POST'])
+def responder_soporte():
+    if request.method == 'POST':
+        respuesta = request.form.get('respuesta')
+        soporte_id = UUID(request.form.get('soporte_id'))
+        fecha = request.form.get('fecha')
+        fecha = datetime.strptime(fecha, '%Y-%m-%d %H:%M:%S.%f')
+        datestamp = datetime.now()
+        
+        session.user_type_registered(keyspace, 'respuesta', Respuesta)
+        
+        session.execute("""
+            UPDATE soporte 
+            SET respuestas = respuestas +  %s 
+            WHERE usuario_id = %s AND soporte_id = %s AND fecha = %s
+        """, (
+            {datestamp: Respuesta(sessionF['usuario_id'], respuesta, sessionF['nombre'])},
+            sessionF['usuario_id'],
+            soporte_id,
+            fecha
+            ))
+
+    return redirect(url_for('LSoportes'))
 
 @app.route('/LRecibos')
 def LRecibos():
@@ -382,7 +422,7 @@ def producto(producto_id):
     lista_comentarios = [comentario._asdict() for comentario in comentario_producto]
  
     if not producto:
-        return redirect(url_for('perfil'))
+        return redirect(url_for('index'))
 
     return render_template('producto.html', producto=producto, usuario=sessionF, lista_comentarios=lista_comentarios)
 

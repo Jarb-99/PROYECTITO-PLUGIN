@@ -73,8 +73,8 @@ def createTables():
         fecha TIMESTAMP,
         mensaje TEXT,
         respuestas MAP<TIMESTAMP, FROZEN<RESPUESTA>>,
-        PRIMARY KEY (usuario_id, soporte_id, fecha)
-    );
+        PRIMARY KEY ((usuario_id), fecha, soporte_id)
+    ) WITH CLUSTERING ORDER BY (fecha DESC);
     """)
 
     session.execute("""

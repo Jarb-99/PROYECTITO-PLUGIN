@@ -120,6 +120,6 @@ header .container {
 }
 
 .no-link-style {
-    color: inherit; /* Hereda el color del elemento padre */
-    text-decoration: none; /* Elimina el subrayado */
+    color: inherit; 
+    text-decoration: none;
 }
