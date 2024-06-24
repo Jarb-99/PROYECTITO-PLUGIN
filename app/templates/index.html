@@ -15,6 +15,12 @@
 
     <main class="container mt-5">
         <h1 class="main-header">Bienvenido a la tienda de plugins</h1>
+
+        <form class="form-inline my-4" method="POST" action="{{ url_for('buscar_producto') }}">
+            <input class="form-control mr-sm-2" type="search" name="buscar" placeholder="Buscar productos" aria-label="Buscar">
+            <button class="btn btn-success my-2 my-sm-0" type="submit">Buscar</button>
+        </form>
+
         <div class="row">
                         
             <!-- Añadir más productos según sea necesario -->

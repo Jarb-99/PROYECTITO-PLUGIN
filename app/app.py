@@ -16,20 +16,22 @@ session = get_cassandra_session()
 #############################################
 # true/ false para activar la creacion de tablas en la base de datos
 # true = puede tardar un 1 minuto la cracion de las tablas   
-boolTables = False
+boolTables = True
 if boolTables:
-    d = 15000 # cantidad de datos
-    p = 100 # cantidad de productos
+    d = 100 # cantidad de datos
+    p = d # cantidad de productos
     deleteTables.deleteTables()
     createTables.createTables()
     insert.insertDatas(d,p)  
 
 #############################################
 # global de productos para ahorrar las consultas por usuarios
-productos = session.execute("""
-		SELECT * FROM producto
-		""")
-lista_productos = {producto.producto_id:producto._asdict() for producto in productos}
+
+lista_productos = {producto.producto_id:producto._asdict() for producto in 
+                   session.execute("""
+						SELECT * FROM producto
+						""")
+                   }
 
 #############################################
 # Views/Urls
@@ -39,8 +41,24 @@ def start():
 
 @app.route('/index')
 def index():
-	  
-	return render_template('index.html', usuario=sessionF, productos=lista_productos)
+        
+    return render_template('index.html', usuario=sessionF, productos=lista_productos)
+
+@app.route('/index/s', methods=['GET','POST'])
+def buscar_producto():
+    if request.method == 'POST':
+        buscar = request.form['buscar'].lower()
+        
+        if buscar == '':
+            return redirect(url_for('index'))
+        
+        lista_productos_buscados = {producto_id:producto 
+                                    for producto_id,producto in lista_productos.items() 
+                                    if buscar in producto['nombre'].lower()}
+        
+        return render_template('index.html', usuario=sessionF, productos=lista_productos_buscados)
+    
+    return redirect(url_for('index'))
 
 @app.route('/login', methods=['GET','POST'])
 def login():
@@ -428,4 +446,4 @@ def producto(producto_id):
 
 
 if __name__ == '__main__':
-	app.run(host='localhost', port=8080, debug=True)
+	app.run(host='localhost', port=8080, debug=False)

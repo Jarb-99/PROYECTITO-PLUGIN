@@ -1,7 +1,8 @@
 from UDTs import *
 from uuid import uuid4
 from faker import Faker
-from datetime import datetime, date
+import random
+from datetime import datetime, date, timedelta
 from connection import get_cassandra_session
 import threading
 import time
@@ -16,6 +17,13 @@ def uuids(n):
         for i in range(n):
             list_uuid.append(uuid4())
     return list_uuid
+
+def datetime_random(start_date, end_date):
+    delta = end_date - start_date
+    random_days = random.randrange(delta.days)
+    random_seconds = random.randrange(24 * 60 * 60)
+    random_microseconds = random.randrange(1000000)
+    return start_date + timedelta(days=random_days, seconds=random_seconds, microseconds=random_microseconds)
 
 def generateDatas(dh, produ, start_index, hilo):
     print(f"Empezando: hilo {hilo}")
@@ -32,8 +40,14 @@ def generateDatas(dh, produ, start_index, hilo):
     session.user_type_registered(keyspace, 'prdcto_anddo', Prdcto_anddo)
     session.user_type_registered(keyspace, 'metodo_pago', Metodo_pago)
     
+    #generar fecha
+    start_date = datetime(2020, 1, 1)
+    end_date = datetime(2023, 12, 31)
+    
     #Generador de datos
     for i in range(dh):
+        
+        #generar datos base
         list_uuid = uuids(6)
         usuario_id = list_uuid[0]
         soporte_id = list_uuid[1]
@@ -44,8 +58,8 @@ def generateDatas(dh, produ, start_index, hilo):
         
         nombre_usuario = fake.first_name()
         
-        fecha_soporte = fake.date_this_year()
-        respuesta_soporte = {fake.date_this_year(): Respuesta(usuario_id, fake.sentence(), nombre_usuario)}
+        fecha_soporte = datetime_random(start_date,end_date)
+        respuesta_soporte = {datetime_random(start_date,end_date): Respuesta(usuario_id, fake.sentence(), nombre_usuario)}
         
         precio_producto = round(fake.random_number(digits=2), 2)
         nombre_producto = f"Producto {produ*hilo+i+1}"
@@ -89,13 +103,13 @@ def generateDatas(dh, produ, start_index, hilo):
             session.execute("""
                 INSERT INTO PRODUCTO (producto_id, nombre, descripcion, precio, fecha, valoracion, compras, version_comptble, plugins, schematics)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """, (producto_id, nombre_producto, fake.sentence(), precio_producto, fake.date_this_year(), valoracion_producto, compras_producto, f'v{fake.random_digit()}', [Plugin(fake.random_element(elements=('1.0', '2.0', '3.0')))], [Schematic(fake.random_int(min=10, max=50))]))
+            """, (producto_id, nombre_producto, fake.sentence(), precio_producto, datetime_random(start_date,end_date), valoracion_producto, compras_producto, f'v{fake.random_digit()}', [Plugin(fake.random_element(elements=('1.0', '2.0', '3.0')))], [Schematic(fake.random_int(min=10, max=50))]))
         
         # Generar datos de carritos
         session.execute("""
             INSERT INTO CARRITO (usuario_id, carrito_id, fecha, monto, productos)
             VALUES (%s, %s, %s, %s, %s)
-        """, (usuario_id, carrito_id, fake.date_this_year(), monto_carrito, producto_anddo))
+        """, (usuario_id, carrito_id, datetime_random(start_date,end_date), monto_carrito, producto_anddo))
         
         # Generar datos de pagos
         session.execute("""
@@ -119,13 +133,13 @@ def generateDatas(dh, produ, start_index, hilo):
         session.execute("""
             INSERT INTO CMNTRIO_PRDCTO (producto_id, usuario_id, fecha, nombre_usuario, descripcion)
             VALUES (%s, %s, %s, %s, %s)
-        """, (producto_id, usuario_id, fake.date_this_year(), nombre_usuario, fake.sentence()))
+        """, (producto_id, usuario_id, datetime_random(start_date,end_date), nombre_usuario, fake.sentence()))
         
         # Generar datos de valoraciones de productos
         session.execute("""
             INSERT INTO VALORAR_PRODUCTO (producto_id, usuario_id, fecha, estrellas)
             VALUES (%s, %s, %s, %s)
-        """, (producto_id, usuario_id, fake.date_this_year(), valoracion_producto))
+        """, (producto_id, usuario_id, datetime_random(start_date,end_date), valoracion_producto))
     
     print(f" Datos del hilo {hilo} generados e insertados en la base de datos.")
 
