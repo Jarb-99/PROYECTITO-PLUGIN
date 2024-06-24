@@ -17,9 +17,9 @@ session = get_cassandra_session()
 #############################################
 # true/ false para activar la creacion de tablas en la base de datos
 # true = puede tardar un 1 minuto la cracion de las tablas   
-boolTables = True
+boolTables = False
 if boolTables:
-    d = 100 # cantidad de datos
+    d = 15000 # cantidad de datos
     p = d # cantidad de productos
     deleteTables.deleteTables()
     createTables.createTables()
@@ -31,6 +31,7 @@ if boolTables:
 lista_productos = OrderedDict(sorted({producto.producto_id:producto._asdict() for producto in 
                    session.execute("""
 						SELECT * FROM producto
+						LIMIT 100
 						""")
                    }.items(), key=lambda x: x[1]['fecha'], reverse=True))
 
@@ -635,6 +636,7 @@ def soporte_admin():
     lista_soportes = OrderedDict(sorted({soporte.usuario_id:soporte._asdict() for soporte in 
                    session.execute("""
 						SELECT * FROM soporte 
+						LIMIT 100
 						""")
                    }.items(), key=lambda x: x[1]['fecha'], reverse=True))
     	
@@ -700,6 +702,7 @@ def buscar_soporte_admin():
 				SELECT * FROM SOPORTE  
 				WHERE usuario_id = %s 
 				ORDER BY fecha DESC
+    			LIMIT 100 
 			""", (UUID(usuario_id), ))}.items())
         
         elif usuario_id == '':
@@ -707,6 +710,7 @@ def buscar_soporte_admin():
 			session.execute("""
 				SELECT * FROM SOPORTE  
 				WHERE soporte_id = %s ALLOW FILTERING
+				LIMIT 100
 			""", (UUID(soporte_id), ))}.items())
         else:
             lista_soportes_buscados=OrderedDict({soporte.soporte_id:soporte._asdict() for soporte in 
@@ -714,6 +718,7 @@ def buscar_soporte_admin():
 				SELECT * FROM SOPORTE  
 				WHERE soporte_id = %s AND usuario_id = %s 
 				ORDER BY fecha DESC ALLOW FILTERING
+				LIMIT 100
 			""", (UUID(soporte_id), UUID(usuario_id)))}.items())
             
         
@@ -723,4 +728,4 @@ def buscar_soporte_admin():
 
 
 if __name__ == '__main__':
-	app.run(host='localhost', port=8080, debug=False)
+	app.run(host='localhost', port=8080, debug=True)
