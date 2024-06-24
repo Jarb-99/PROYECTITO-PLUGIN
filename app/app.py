@@ -631,20 +631,58 @@ def editar_perfil_admin():
 
 
 @app.route('/LSoportes/admin')
-def soporte_admin():
-	lista_soportes = session.execute("""
-		SELECT * FROM soporte 
-		WHERE usuario_id=%s
-  		ORDER BY fecha DESC
-		""", (sessionF['usuario_id'],))
-	
-	return render_template('soporte_admin.html', usuario=sessionF,soportes=lista_soportes)
+def soporte_admin(): 
+    lista_soportes = OrderedDict(sorted({soporte.usuario_id:soporte._asdict() for soporte in 
+                   session.execute("""
+						SELECT * FROM soporte 
+						""")
+                   }.items(), key=lambda x: x[1]['fecha'], reverse=True))
+    	
+    
+    
+    return render_template('soporte_admin.html', usuario=sessionF,soportes=lista_soportes)
 
 
+@app.route('/LSoportes/admin/resp', methods=['POST'])
+def responder_soporte_admin():
+    if request.method == 'POST':
+        respuesta = request.form.get('respuesta')
+        soporte_id = UUID(request.form.get('soporte_id'))
+        usuario_id = UUID(request.form.get('usuario_id'))
+        fecha = request.form.get('fecha')
+        fecha = datetime.strptime(fecha, '%Y-%m-%d %H:%M:%S.%f')
+        datestamp = datetime.now()
+        
+        session.user_type_registered(keyspace, 'respuesta', Respuesta)
+        
+        session.execute("""
+            UPDATE soporte 
+            SET respuestas = respuestas +  %s 
+            WHERE usuario_id = %s AND soporte_id = %s AND fecha = %s
+        """, (
+            {datestamp: Respuesta(sessionF['usuario_id'], respuesta, sessionF['nombre'])},
+            usuario_id,
+            soporte_id,
+            fecha
+            ))
+
+    return redirect(url_for('soporte_admin'))
 
 
-
-
+@app.route('/LSoportes/admin/del', methods=['POST'])
+def eliminar_soporte_admin():
+    if request.method == 'POST':       
+        soporte_id = UUID(request.form.get('soporte_id'))	
+        usuario_id = UUID(request.form.get('usuario_id'))	
+        fecha = request.form.get('fecha')
+        fecha = datetime.strptime(fecha, '%Y-%m-%d %H:%M:%S.%f')
+        
+        session.execute("""
+			DELETE FROM SOPORTE  
+			WHERE soporte_id = %s AND fecha = %s AND usuario_id=%s
+		""", (soporte_id, fecha, usuario_id))
+    
+    return redirect(url_for('soporte_admin'))
 
 
 
