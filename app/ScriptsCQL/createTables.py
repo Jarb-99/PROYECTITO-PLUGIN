@@ -73,7 +73,7 @@ def createTables():
         soporte_id UUID,
         mensaje TEXT,
         respuestas MAP<TIMESTAMP, FROZEN<RESPUESTA>>,
-        PRIMARY KEY ((usuario_id), fecha)
+        PRIMARY KEY ((usuario_id), fecha, soporte_id)
     ) WITH CLUSTERING ORDER BY (fecha DESC);
     """)
 

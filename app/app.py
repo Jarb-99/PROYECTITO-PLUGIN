@@ -17,7 +17,7 @@ session = get_cassandra_session()
 #############################################
 # true/ false para activar la creacion de tablas en la base de datos
 # true = puede tardar un 1 minuto la cracion de las tablas   
-boolTables = False
+boolTables = True
 if boolTables:
     d = 100 # cantidad de datos
     p = d # cantidad de productos
@@ -656,14 +656,14 @@ def responder_soporte_admin():
         session.user_type_registered(keyspace, 'respuesta', Respuesta)
         
         session.execute("""
-            UPDATE soporte 
+            UPDATE soporte
             SET respuestas = respuestas +  %s 
-            WHERE usuario_id = %s AND soporte_id = %s AND fecha = %s
+            WHERE usuario_id = %s AND fecha = %s AND soporte_id = %s
         """, (
             {datestamp: Respuesta(sessionF['usuario_id'], respuesta, sessionF['nombre'])},
             usuario_id,
-            soporte_id,
-            fecha
+            fecha,
+            soporte_id
             ))
 
     return redirect(url_for('soporte_admin'))
@@ -698,7 +698,7 @@ def buscar_soporte_admin():
             lista_soportes_buscados=OrderedDict({soporte.soporte_id:soporte._asdict() for soporte in 
 			session.execute("""
 				SELECT * FROM SOPORTE  
-				WHERE usuario_id = %s
+				WHERE usuario_id = %s 
 				ORDER BY fecha DESC
 			""", (UUID(usuario_id), ))}.items())
         
@@ -723,4 +723,4 @@ def buscar_soporte_admin():
 
 
 if __name__ == '__main__':
-	app.run(host='localhost', port=8080, debug=True)
+	app.run(host='localhost', port=8080, debug=False)
