@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Perfil</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/stylePerfil.css') }}">
+</head>
+<body>
+    <header class="navbar navbar-expand-lg navbar-dark bg-dark">
+        {% include 'navbar_admin.html' %}
+    </header>
+    <main class="container mt-5">
+        <div class="col-md-6 mx-auto">
+            <div class="card mt-5">
+                <div class="card-body">
+                    <form id="editar-perfil-form" method="POST" action="{{ url_for('editar_perfil_admin') }}">
+                        <h5 class="card-title">Información Personal</h5>
+
+                        <p class="card-text"><strong>Nombre:</strong> <span id="nombre-text">{{ usuario.nombre }}</span></p>
+                        <input type="text" class="form-control mb-2" id="nombre-input" name="nombre" style="display:none;" value="{{ usuario.nombre }}">
+
+                        <p class="card-text"><strong>Apellido:</strong> <span id="apellido-text">{{ usuario.apellido }}</span></p>
+                        <input type="text" class="form-control mb-2" id="apellido-input" name="apellido" style="display:none;" value="{{ usuario.apellido }}">
+
+                        <p class="card-text"><strong>Correo electrónico:</strong> <span id="correo-text">{{ usuario.correo }}</span></p>
+                        <input type="email" class="form-control mb-2" id="correo-input" name="correo" style="display:none;" value="{{ usuario.correo }}">
+
+                        <p class="card-text"><strong>Contraseña:</strong> <span id="contrasena-text">{{ usuario.contrasena }}</span></p>
+                        <input type="password" class="form-control mb-2" id="contrasena-input" name="contrasena" style="display:none;" value="{{ usuario.contrasena }}">
+
+                        <p class="card-text"><strong>Teléfono:</strong> <span id="telefono-text">{{ usuario.telefono }}</span></p>
+                        <input type="text" class="form-control mb-2" id="telefono-input" name="telefono" style="display:none;" value="{{ usuario.telefono }}">
+
+                        <p class="card-text"><strong>Dirección:</strong> <span id="direccion-text">{{ usuario.direccion }}</span></p>
+                        <input type="text" class="form-control mb-2" id="direccion-input" name="direccion" style="display:none;" value="{{ usuario.direccion }}">
+
+                        <p class="card-text"><strong>Fecha de unión:</strong> {{ usuario.fecha_rgstro }}</p>
+                        <p class="card-text"><strong>Usuario id:</strong> {{ usuario.usuario_id }}</p>
+
+                        <a href="#" class="btn btn-primary" id="editar-btn" onclick="mostrarEdicion()">Editar Perfil</a>
+                        <button type="submit" class="btn btn-success" id="subir-btn" style="display:none;">Subir</button>
+                        <a href="#" class="btn btn-secondary" id="cancelar-btn" style="display:none;" onclick="cancelarEdicion()">Cancelar</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function mostrarEdicion() {
+            const elementsToHide = ['nombre', 'apellido', 'correo', 'contrasena', 'telefono', 'direccion'];
+            elementsToHide.forEach(element => {
+                document.getElementById(`${element}-text`).style.display = 'none';
+                document.getElementById(`${element}-input`).style.display = 'block';
+            });
+
+            document.getElementById('editar-btn').style.display = 'none';
+            document.getElementById('subir-btn').style.display = 'inline-block';
+            document.getElementById('cancelar-btn').style.display = 'inline-block';
+        }
+
+        function cancelarEdicion() {
+            const elementsToShow = ['nombre', 'apellido', 'correo', 'contrasena', 'telefono', 'direccion'];
+            elementsToShow.forEach(element => {
+                document.getElementById(`${element}-text`).style.display = 'inline';
+                document.getElementById(`${element}-input`).style.display = 'none';
+            });
+
+            document.getElementById('editar-btn').style.display = 'inline-block';
+            document.getElementById('subir-btn').style.display = 'none';
+            document.getElementById('cancelar-btn').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

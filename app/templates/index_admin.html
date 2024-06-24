@@ -13,15 +13,7 @@
 </head>
 <body>
     <header class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="#">Administradores</a>
-            <div class="navbar-nav">
-                <a class="nav-link" href="{{ url_for('index_admin') }}">Editar Productos</a>
-                <a class="nav-link" href="{{ url_for('perfil_admin') }}">Perfil( {{ usuario['nombre'] }} )</a>
-                <a class="nav-link" href="{{ url_for('soporte_admin') }}">Soporte</a>
-                <a class="nav-link" href="{{ url_for('logout') }}">Log out</a>
-            </div>
-        </div>
+        {% include 'navbar_admin.html' %}
     </header>
 
     <main class="container mt-5">
