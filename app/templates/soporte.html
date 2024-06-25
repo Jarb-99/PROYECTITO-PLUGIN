@@ -5,25 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crear Soporte</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styleSoporte.css') }}">
 </head>
 <body>
     <header class="navbar navbar-expand-lg navbar-dark bg-dark">
         {% include 'navbar.html' %}
     </header>
-    <div class="container mt-4">
-        <section id="crearSoporte">
-            <div id="alert-success" class="alert alert-success" role="alert" style="display:none;">
-                ¡Soporte enviado exitosamente!
+    <div class="main-header">
+        <div class="welcome-container">
+            <h1 class="welcome-message">HOLA!</h1>
+            <p class="welcome-submessage">Bienvenido al soporte de la tienda</p>
+            <div class="container mt-4">
+                <section id="crearSoporte">
+                    <div id="alert-success" class="alert alert-success" role="alert" style="display:none;">
+                        ¡Soporte enviado exitosamente!
+                    </div>
+                    <form id="soporteForm" method="POST" action="{{ url_for('soporte') }}">
+                        <div class="form-group">
+                            <label for="mensaje">Mensaje:</label>
+                            <textarea id="mensaje" name="mensaje" class="form-control" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Enviar</button>
+                    </form>
+                </section>
             </div>
-            <form id="soporteForm" method="POST" action="{{ url_for('soporte') }}">
-                <div class="form-group">
-                    <label for="mensaje">Mensaje:</label>
-                    <textarea id="mensaje" name="mensaje" class="form-control" required></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary">Enviar</button>
-            </form>
-        </section>
+        </div>
     </div>
 </body>
 </html>

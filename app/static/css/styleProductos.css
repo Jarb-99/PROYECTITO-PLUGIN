@@ -4,7 +4,8 @@ body {
     flex-direction: column;
     margin: 0;
     font-family: 'Arial', sans-serif;
-    background-color: #f8f9fa;
+    background-color: #f8f9fa; /* Color de fondo general */
+    color: #343a40; /* Color principal del texto */
 }
 
 .sidebar {
@@ -13,8 +14,8 @@ body {
     left: 0;
     height: 100%;
     width: 200px;
-    background-color: #343a40;
-    padding-top: 60px; /* Adjusted for header overlap */
+    background-color: #343a40; /* Color de fondo de la barra lateral */
+    padding-top: 60px; /* Ajustado para superponerse al encabezado */
     transition: all 0.3s;
 }
 
@@ -23,21 +24,21 @@ body {
     text-align: left;
     text-decoration: none;
     font-size: 16px;
-    color: white;
+    color: white; /* Color del texto en los enlaces de la barra lateral */
     display: block;
     transition: background-color 0.3s, color 0.3s;
 }
 
 .sidebar a:hover {
-    background-color: #495057;
-    color: #fff;
+    background-color: #495057; /* Color de fondo al pasar el ratón */
+    color: #fff; /* Color del texto al pasar el ratón */
     border-radius: 0 10px 10px 0;
 }
 
 .content {
-    margin-left: 200px;
+    margin-left: 200px; /* Ancho de la barra lateral */
     padding: 20px;
-    width: calc(100% - 200px);
+    width: calc(100% - 200px); /* Ajuste para el contenido principal */
 }
 
 header.bg-dark {
@@ -47,7 +48,7 @@ header.bg-dark {
 }
 
 main.container {
-    margin-top: 80px; /* Adjusted for header overlap */
+    margin-top: 80px; /* Ajuste para superponerse al encabezado */
 }
 
 .card {
@@ -55,6 +56,7 @@ main.container {
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     transition: transform 0.3s, box-shadow 0.3s;
+    background-color: #c77633; /* Color de fondo de las tarjetas */
 }
 
 .card:hover {
@@ -63,23 +65,23 @@ main.container {
 }
 
 .card-title {
-    color: #343a40;
+    color: #343a40; /* Color del título de la tarjeta */
     font-weight: bold;
 }
 
 .card-text {
-    color: #6c757d;
+    color: #e9ecef; /* Color del texto en las tarjetas */
 }
 
 .btn-primary {
-    background-color: #007bff;
+    background-color: #007bff; /* Color de fondo del botón primario */
     border-color: #007bff;
     transition: background-color 0.3s, color 0.3s;
 }
 
 .btn-primary:hover {
-    background-color: #0056b3;
-    color: #fff;
+    background-color: #0056b3; /* Color de fondo del botón primario al pasar el ratón */
+    color: #fff; /* Color del texto del botón primario al pasar el ratón */
 }
 
 .list-group-item {
@@ -92,7 +94,7 @@ main.container {
 }
 
 .list-group-item:hover {
-    background-color: #f1f1f1;
+    background-color: #f1f1f1; /* Color de fondo al pasar el ratón */
     transform: translateY(-2px);
 }
 
@@ -126,4 +128,8 @@ header .container {
 .no-link-style:hover {
     color: inherit; /* Mantiene el color al pasar el mouse */
     text-decoration: none; /* Mantiene sin subrayado al pasar el mouse */
+}
+
+.text-muted {
+    color: #e9ecef; /* Color del texto con clase .text-muted (fecha de compra) */
 }

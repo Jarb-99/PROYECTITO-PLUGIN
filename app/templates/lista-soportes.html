@@ -9,12 +9,12 @@
 <body>
     <header class="navbar navbar-expand-lg navbar-dark bg-dark">
         {% include 'navbar.html' %}
-        <div class="sidebar">
-            <a href="{{ url_for('PComprados') }}">Productos Comprados</a>
-            <a href="{{ url_for('LSoportes') }}">Soportes</a>
-            <a href="{{ url_for('LRecibos') }}">Recibos</a>
-        </div>
     </header>
+    <div class="sidebar">
+        <a href="{{ url_for('PComprados') }}">Productos Comprados</a>
+        <a href="{{ url_for('LSoportes') }}">Soportes</a>
+        <a href="{{ url_for('LRecibos') }}">Recibos</a>
+    </div>
     <div class="content">
         <main class="container mt-5">
             <h1>Lista de Soportes</h1>
@@ -34,25 +34,17 @@
                                             <strong>{{ respuesta.nombre_creador }}:</strong> {{ respuesta.mensaje }}
                                             <br><small>{{ timestamp }}</small>
                                         </li>
-
-                                        
-                                        
                                         {% endfor %}
                                     {% endif %}
                                     <button class="btn btn-link p-0" onclick="mostrarFormularioRespuesta('{{ soporte.soporte_id }}')">Responder</button>
-                        
                                     <form id="form-respuesta-{{ soporte.soporte_id }}" class="mt-2" style="display: none;" method="POST" action="{{ url_for('responder_soporte') }}">
-                            
                                         <div class="form-group">
                                             <textarea class="form-control" name="respuesta" rows="2" placeholder="Escribe tu respuesta..."></textarea>
                                         </div>
-
                                         <input type="hidden" name="soporte_id" value="{{ soporte.soporte_id }}">
                                         <input type="hidden" name="fecha" value="{{ soporte.fecha }}">
-
                                         <button type="submit" class="btn btn-success">Enviar</button>
                                         <button type="button" class="btn btn-secondary" onclick="ocultarFormularioRespuesta('{{ soporte.soporte_id }}')">Cancelar</button>
-
                                     </form>
                                 </ul>
                             </div>
@@ -62,18 +54,18 @@
             </div>
         </main>
     </div>
-</body>
 
-<script>
-    function mostrarFormularioRespuesta(soporteId) {
-        var formId = 'form-respuesta-' + soporteId;
-        document.getElementById(formId).style.display = 'block';
-    }
-    
-    function ocultarFormularioRespuesta(soporteId) {
-        var formId = 'form-respuesta-' + soporteId;
-        document.getElementById(formId).style.display = 'none';
-    }
+    <script>
+        function mostrarFormularioRespuesta(soporteId) {
+            var formId = 'form-respuesta-' + soporteId;
+            document.getElementById(formId).style.display = 'block';
+        }
+        
+        function ocultarFormularioRespuesta(soporteId) {
+            var formId = 'form-respuesta-' + soporteId;
+            document.getElementById(formId).style.display = 'none';
+        }
     </script>
 
+</body>
 </html>

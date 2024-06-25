@@ -6,6 +6,11 @@ body {
     margin: 0;
     font-family: 'Arial', sans-serif;
     background-color: #f8f9fa;
+    background-image: url('/static/images/perfilImage.jpg');
+    background-size: cover; /* Ajusta la imagen para cubrir toda el área */
+    background-position: center; /* Centra la imagen */
+    background-repeat: no-repeat; /* Evita que la imagen se repita */
+    height: 100vh; /* Asegura que la imagen de fondo cubra toda la altura de la ventana */
 }
 
 .sidebar {

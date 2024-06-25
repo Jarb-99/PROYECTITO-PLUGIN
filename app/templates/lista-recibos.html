@@ -10,40 +10,40 @@
     <header class="navbar navbar-expand-lg navbar-dark bg-dark">
         {% include 'navbar.html' %}
         <div class="sidebar">
-            <div class="conteiner">
-            <a href="{{ url_for('PComprados') }}">Productos Comprados</a>
-            <a href="{{ url_for('LSoportes') }}">Soportes</a>
-            <a href="{{ url_for('LRecibos') }}">Recibos</a>
+            <div class="container">
+                <a href="{{ url_for('PComprados') }}">Productos Comprados</a>
+                <a href="{{ url_for('LSoportes') }}">Soportes</a>
+                <a href="{{ url_for('LRecibos') }}">Recibos</a>
+            </div>
         </div>
     </header>
     <div class="content">
-    <main class="container mt-5">
-        <h5 class="card-title">Lista de Recibos</h5>
-        {% for recibo in recibos %}
-        <div class="card mb-4">
-            <div class="card-body">
-                <h5 class="card-title"><strong>Id del Recibo: {{ recibo.recibo_id }}</strong></h5>
-                <p class="card-text">Fecha: <strong>{{ recibo.fecha }}</strong></p>
-                <p class="card-text">Método de Pago: <strong>{{ recibo.metodo.nombre }}: {{ recibo.metodo.descripcion }}</strong></p>
-                <ul class="list-group mb-4">
-                    {% for producto in recibo.productos %}
-                    <a href="{{ url_for('producto', producto_id=producto.producto_id) }}" class="no-link-style">
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                                    
-                                <h6 class="my-0">{{ producto.nombre }}</h6>
-                                <small class="text-muted">Cantidad: {{ producto.cantidad }}</small>
-                            </div>
-                            <span class="text-muted">${{ producto.precio }}</span>
-                        </li>
-                    </a>
-                    {% endfor %}
-                </ul>
-                <h3>Total: $<span>{{ recibo.monto }}</span></h3>
+        <main class="container mt-5">
+            <h1>Lista de Recibos</h1>
+            {% for recibo in recibos %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title"><strong>Id del Recibo: {{ recibo.recibo_id }}</strong></h5>
+                    <p class="card-text">Fecha: <strong>{{ recibo.fecha }}</strong></p>
+                    <p class="card-text">Método de Pago: <strong>{{ recibo.metodo.nombre }}: {{ recibo.metodo.descripcion }}</strong></p>
+                    <ul class="list-group mb-4">
+                        {% for producto in recibo.productos %}
+                        <a href="{{ url_for('producto', producto_id=producto.producto_id) }}" class="no-link-style">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="my-0">{{ producto.nombre }}</h6>
+                                    <small class="text-muted">Cantidad: {{ producto.cantidad }}</small>
+                                </div>
+                                <span class="text-muted">${{ producto.precio }}</span>
+                            </li>
+                        </a>
+                        {% endfor %}
+                    </ul>
+                    <h3>Total: $<span>{{ recibo.monto }}</span></h3>
+                </div>
             </div>
-        </div>
-        {% endfor %}
-    </main>
+            {% endfor %}
+        </main>
     </div>
 </body>
 </html>
