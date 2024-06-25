@@ -17,7 +17,7 @@ session = get_cassandra_session()
 #############################################
 # true/ false para activar la creacion de tablas en la base de datos
 # true = puede tardar un 1 minuto la cracion de las tablas   
-boolTables = False
+boolTables = True
 if boolTables:
     d = 15000 # cantidad de datos
     p = d # cantidad de productos
