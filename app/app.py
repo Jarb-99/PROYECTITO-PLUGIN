@@ -17,9 +17,9 @@ session = get_cassandra_session()
 #############################################
 # true/ false para activar la creacion de tablas en la base de datos
 # true = puede tardar un 1 minuto la cracion de las tablas   
-boolTables = True
+boolTables = False
 if boolTables:
-    d = 15000 # cantidad de datos
+    d = 100 # cantidad de datos
     p = d # cantidad de productos
     deleteTables.deleteTables()
     createTables.createTables()
@@ -29,11 +29,11 @@ if boolTables:
 # global de productos para ahorrar las consultas por usuarios
 
 lista_productos = OrderedDict(sorted({producto.producto_id:producto._asdict() for producto in 
-                   session.execute("""
-						SELECT * FROM producto
-						LIMIT 100
-						""")
-                   }.items(), key=lambda x: x[1]['fecha'], reverse=True))
+	session.execute("""
+		SELECT * FROM producto
+		LIMIT 100
+		""")
+	}.items(), key=lambda x: x[1]['fecha'], reverse=True))
 
 #############################################
 # Views/Urls
@@ -66,16 +66,19 @@ def login():
     if request.method == 'POST':
         correo = request.form['email']
         contrasena = request.form['password']
-        
+        #seleccionar el usuario si es que existe
         usuario = session.execute("""
 		SELECT * FROM usuario 
 		WHERE correo=%s AND contrasena=%s ALLOW FILTERING
 		""", ( correo, contrasena )).one()
     
         if usuario:
+            # validar el ingreso del usuario a su cuenta
             if usuario.contrasena == contrasena:
+                # actualizar la sesion del usuario para su uso global
                 SM.set_usuario_dict(sessionF, usuario._asdict())
-    
+                
+				# ver si el usuario es propietario
                 admin = session.execute("""
 				SELECT nombre_usuario FROM propietario 
 				WHERE usuario_id=%s ALLOW FILTERING
@@ -194,15 +197,16 @@ def producto(producto_id):
     producto = session.execute("""
         SELECT * FROM producto WHERE producto_id = %s
     """, (producto_id,)).one()
-    
+
+    if not producto:
+        return redirect(url_for('index'))
+        
     comentario_producto = session.execute("""
         SELECT * FROM cmntrio_prdcto WHERE producto_id = %s
     """, (producto_id,))
     
     lista_comentarios = [comentario._asdict() for comentario in comentario_producto]
  
-    if not producto:
-        return redirect(url_for('index'))
 
     return render_template('producto.html', producto=producto, usuario=sessionF, lista_comentarios=lista_comentarios)
 
@@ -273,9 +277,19 @@ def editar_perfil():
 
 
 
-
 @app.route('/Carrito', methods=['GET', 'POST'])
 def carrito():
+    # seleccionar el carrito del usuario
+    carrito = session.execute("""
+		SELECT * FROM carrito 
+		WHERE carrito_id=%s ALLOW FILTERING
+		""", (sessionF['carrito_id'],)).one()
+        
+    return render_template('carrito.html', usuario=sessionF, carrito=carrito)
+
+
+@app.route('/Carrito/add', methods=['GET', 'POST'])
+def agregar_carrito():
     # seleccionar el carrito del usuario
     carrito = session.execute("""
 		SELECT * FROM carrito 
@@ -286,6 +300,13 @@ def carrito():
     if request.method == 'POST':
         producto_id = UUID(request.form['producto_id'])
         
+        # para saber si el producto aun existe
+        producto = session.execute("""
+            SELECT * FROM producto WHERE producto_id = %s
+        """, (producto_id,)).one()
+        if not producto:
+            return redirect(url_for('index'))
+    
         cantidad = int(request.form['cantidad'])        
         precio = float(request.form['precio'])
         nombre = request.form['nombre']
@@ -299,17 +320,13 @@ def carrito():
         verify_product = None    
         if carrito.productos:
             verify_product = session.execute("""
-				SELECT producto_id FROM PRODUCTO_EN_CARRITO 
+				SELECT monto,cantidad FROM PRODUCTO_EN_CARRITO 
 				WHERE usuario_id=%s and producto_id=%s and carrito_id=%s
 				""", (sessionF['usuario_id'], producto_id, sessionF['carrito_id'])).one()
-            
-            #for producto in carrito.productos:
-            #    if producto.producto_id == producto_id:
-            #        verify_product = producto
-            #        break
                 
         if verify_product: 
             # de existir el producto actualizarlo de carrito
+            # eliminar el pruducto de la lista para luego reinsertarlo
             session.execute("""
 				UPDATE carrito 
 				SET productos = productos - %s, monto = %s 
@@ -319,12 +336,19 @@ def carrito():
             
             edit_monto = float(verify_product.monto)
             edit_cantidad = int(verify_product.cantidad)
-        else:
-            # de no existir se inserta el producto a producto_en_carrito
+            #actualizar producto_en_carrito para los nuevos valores
             session.execute("""
-				INSERT INTO PRODUCTO_EN_CARRITO (carrito_id, producto_id usuario_id)
-				VALUES (%s, %s, %s)
-				""", (carrito.carrito_id, producto_id, sessionF['usuario_id']))
+				UPDATE PRODUCTO_EN_CARRITO 
+				SET monto=%s, cantidad=%s
+				WHERE usuario_id=%s and producto_id=%s and carrito_id=%s
+				""", (monto + edit_monto, cantidad + edit_cantidad, sessionF['usuario_id'], producto_id, sessionF['carrito_id']))
+            
+        else:
+            # de no existir se inserta el producto a producto_en_carrito            
+            session.execute("""
+				INSERT INTO PRODUCTO_EN_CARRITO (carrito_id, producto_id, usuario_id, fecha_carrito, monto, cantidad)
+				VALUES (%s, %s, %s, %s, %s, %s)
+				""", (carrito.carrito_id, producto_id, sessionF['usuario_id'], carrito.fecha, monto, cantidad))
             
         # insertar el nuevo producto en el carrito
         session.execute("""
@@ -333,27 +357,28 @@ def carrito():
 			WHERE carrito_id=%s AND usuario_id=%s AND fecha=%s 
 			""", 
 			({Prdcto_anddo(producto_id, nombre, precio, monto + edit_monto, cantidad + edit_cantidad)}, float(carrito.monto) + monto, carrito.carrito_id, carrito.usuario_id, carrito.fecha))
-
         
-        #recargar la lista de carrito 
-        carrito = session.execute("""
-			SELECT * FROM carrito 
-			WHERE carrito_id=%s ALLOW FILTERING
-			""", (sessionF['carrito_id'],)).one()
-        
-    return render_template('carrito.html', usuario=sessionF, carrito=carrito)
+    return redirect(url_for('carrito'))
 
 @app.route('/Carrito/edit', methods=['POST'])
 def editar_producto_carrito():
     
     if request.method == 'POST':
+        producto_id = UUID(request.form['producto_id'])
+        
+        # para saber si el producto aun existe
+        producto = session.execute("""
+            SELECT nombre FROM producto WHERE producto_id = %s
+        """, (producto_id,)).one()
+        if not producto:
+            return redirect(url_for('carrito'))
+        
         nueva_cantidad = int(request.form['nuevacantidad'])
         cantidad = int(request.form['cantidad'])
         
         if cantidad == 1 and nueva_cantidad == 1:
             return redirect(url_for('carrito'))
         
-        producto_id = UUID(request.form['producto_id'])
         precio = float(request.form['precio'])
         nombre = request.form['nombre']
         actual_monto_producto = float(request.form['producto_monto'])
@@ -380,18 +405,32 @@ def editar_producto_carrito():
             carrito.usuario_id,
             carrito.fecha
         ))
+        #tambien actualizar el producto de producto_en_carrito 
+        session.execute("""
+			UPDATE PRODUCTO_EN_CARRITO 
+			SET monto=%s, cantidad=%s, fecha_carrito=%s
+			WHERE usuario_id=%s and producto_id=%s and carrito_id=%s
+			""", (nuevo_monto_producto, nueva_cantidad, carrito.fecha, sessionF['usuario_id'], producto_id, sessionF['carrito_id']))
     
     return redirect(url_for('carrito'))
 
 @app.route('/Carrito/del', methods=['POST'])
 def eliminar_producto_carrito():
     if request.method == 'POST':
+        producto_id = UUID(request.form['producto_id'])
+        # para saber si el producto aun existe
+        producto = session.execute("""
+            SELECT nombre FROM producto WHERE producto_id = %s
+        """, (producto_id,)).one()
+        if not producto:
+            return redirect(url_for('carrito'))
+        
+        #logica para eliminar el productos	
         carrito = session.execute("""
 			SELECT * FROM carrito 
 			WHERE carrito_id=%s ALLOW FILTERING
 			""", (sessionF['carrito_id'],)).one()
         
-        producto_id = UUID(request.form['producto_id'])	
         precio = float(request.form['precio'])
         nombre = request.form['nombre']
         cantidad = int(request.form['cantidad'])
@@ -416,7 +455,7 @@ def eliminar_producto_carrito():
         #eliminamos el producto de producto_en_carrito
         session.execute("""
 			DELETE FROM PRODUCTO_EN_CARRITO 
-   			WHERE (usuario_id=%s, carrito_id=%s, producto_id=%s)
+   			WHERE usuario_id=%s and carrito_id=%s and producto_id=%s
 			""", (sessionF['usuario_id'], carrito.carrito_id, producto_id))
     
     return redirect(url_for('carrito'))
@@ -424,6 +463,14 @@ def eliminar_producto_carrito():
 @app.route('/Carrito/pag', methods=['POST'])
 def pagar_carrito():
     if request.method == 'POST':
+        carrito = session.execute("""
+			SELECT * FROM carrito 
+			WHERE carrito_id=%s ALLOW FILTERING
+			""", (sessionF['carrito_id'],)).one()
+        #comprobar si la lista de productos existe
+        if not carrito.productos:
+            return redirect(url_for('carrito'))
+
         metodo_pago = request.form.get('metodoPago')
         correo = request.form.get('correo')
         datestamp = datetime.now()
@@ -433,10 +480,6 @@ def pagar_carrito():
         carrito_id = uuid4()
         print(carrito_id)
         
-        carrito = session.execute("""
-			SELECT * FROM carrito 
-			WHERE carrito_id=%s ALLOW FILTERING
-			""", (sessionF['carrito_id'],)).one()
         
         session.user_type_registered(keyspace, 'prdcto_anddo', Prdcto_anddo)
         session.user_type_registered(keyspace, 'metodo_pago', Metodo_pago)
@@ -487,7 +530,7 @@ def pagar_carrito():
 		#eliminamos todos los productos del carrito de la tabla producto_en_carrito
         session.execute("""
 			DELETE FROM PRODUCTO_EN_CARRITO 
-   			WHERE (usuario_id=%s, carrito_id=%s)
+   			WHERE usuario_id=%s AND carrito_id=%s
 			""", (sessionF['usuario_id'], carrito.carrito_id))
   
 		#actualizamos el nuevo carrito para el usuario
@@ -551,8 +594,18 @@ def LSoportes():
 @app.route('/LSoportes/resp', methods=['POST'])
 def responder_soporte():
     if request.method == 'POST':
-        respuesta = request.form.get('respuesta')
+        #revisar si existe el soporte
         soporte_id = UUID(request.form.get('soporte_id'))
+        soporte = session.execute("""
+            SELECT soporte_id FROM soporte 
+            WHERE soporte_id = %s ALLOW FILTERING
+        """, (soporte_id, ))
+
+        if not soporte:
+            return redirect(url_for('LSoportes'))
+        
+        respuesta = request.form.get('respuesta')
+        
         fecha = request.form.get('fecha')
         fecha = datetime.strptime(fecha, '%Y-%m-%d %H:%M:%S.%f')
         datestamp = datetime.now()
@@ -562,11 +615,10 @@ def responder_soporte():
         session.execute("""
             UPDATE soporte 
             SET respuestas = respuestas +  %s 
-            WHERE usuario_id = %s AND soporte_id = %s AND fecha = %s
+            WHERE usuario_id = %s  AND fecha = %s
         """, (
             {datestamp: Respuesta(sessionF['usuario_id'], respuesta, sessionF['nombre'])},
             sessionF['usuario_id'],
-            soporte_id,
             fecha
             ))
 
@@ -690,6 +742,7 @@ def editar_producto_admin():
     
     if request.method == 'POST':
         accion = request.form.get('accion')
+        producto_id = None
         if 'confirmar' in accion:
             nombre = request.form['nombre']
             descripcion = request.form['descripcion']
@@ -726,27 +779,33 @@ def editar_producto_admin():
 				WHERE producto_id = %s AND fecha = %s
 			""", (producto_id, fecha))
         
-            del lista_productos[producto_id]         
-
-    return redirect(url_for('index_admin'))
-
-@app.route('/index/admin/del', methods=['POST'])
-def eliminar_producto_admin():
-    if request.method == 'POST':       
-        producto_id = UUID(request.form['producto_id'])	
-        fecha = request.form['fecha']
-        fecha = datetime.strptime(fecha, '%Y-%m-%d %H:%M:%S.%f')
+            del lista_productos[producto_id]
+            
+        #buscar en los producto_en_carrito el producto editado para vaciar todo los productos de los carritos y de producto_en_carrito
+        carritosFind = session.execute("""
+			SELECT carrito_id,producto_id,usuario_id,fecha_carrito 
+   			FROM prdcto_en_crrto_producto_id  
+			WHERE producto_id = %s ALLOW FILTERING
+			""", (producto_id, ))
         
-        session.user_type_registered(keyspace, 'prdcto_anddo', Prdcto_anddo)
+        if carritosFind:
+            for carrito in carritosFind:
+                print("AAAAAAA")
+                print(carrito)	
+                session.execute("""
+    			    UPDATE carrito 
+    			    SET productos = {}, monto=0 
+		    	    WHERE usuario_id = %s AND carrito_id = %s AND fecha=%s
+    			    """, (carrito.usuario_id, carrito.carrito_id, carrito.fecha_carrito))         
+                
+                
+                session.execute("""
+				    DELETE FROM PRODUCTO_EN_CARRITO 
+   				    WHERE usuario_id=%s and carrito_id=%s and producto_id=%s
+				    """, (carrito.usuario_id, carrito.carrito_id, carrito.producto_id))
         
-        session.execute("""
-			DELETE FROM PRODUCTO  
-			WHERE producto_id = %s AND fecha = %s
-		""", (producto_id, fecha))
         
-        del lista_productos[producto_id]
         
-
     return redirect(url_for('index_admin'))
 
 @app.route('/Perfil/admin')
@@ -815,12 +874,11 @@ def responder_soporte_admin():
         session.execute("""
             UPDATE soporte
             SET respuestas = respuestas +  %s 
-            WHERE usuario_id = %s AND fecha = %s AND soporte_id = %s
+            WHERE usuario_id = %s AND fecha = %s
         """, (
             {datestamp: Respuesta(sessionF['usuario_id'], respuesta, sessionF['nombre'])},
             usuario_id,
-            fecha,
-            soporte_id
+            fecha
             ))
 
     return redirect(url_for('soporte_admin'))
@@ -836,8 +894,8 @@ def eliminar_soporte_admin():
         
         session.execute("""
 			DELETE FROM SOPORTE  
-			WHERE soporte_id = %s AND fecha = %s AND usuario_id=%s
-		""", (soporte_id, fecha, usuario_id))
+			WHERE fecha = %s AND usuario_id=%s
+		""", (fecha, usuario_id))
     
     return redirect(url_for('soporte_admin'))
 
@@ -865,15 +923,14 @@ def buscar_soporte_admin():
 			session.execute("""
 				SELECT * FROM SOPORTE  
 				WHERE soporte_id = %s ALLOW FILTERING
-				LIMIT 100
 			""", (UUID(soporte_id), ))}.items())
         else:
             lista_soportes_buscados=OrderedDict({soporte.soporte_id:soporte._asdict() for soporte in 
 			session.execute("""
 				SELECT * FROM SOPORTE  
 				WHERE soporte_id = %s AND usuario_id = %s 
-				ORDER BY fecha DESC ALLOW FILTERING
-				LIMIT 100
+				ORDER BY fecha DESC 
+				LIMIT 100 ALLOW FILTERING
 			""", (UUID(soporte_id), UUID(usuario_id)))}.items())
             
         
@@ -883,4 +940,4 @@ def buscar_soporte_admin():
 
 
 if __name__ == '__main__':
-	app.run(host='localhost', port=8080, debug=False)
+	app.run(host='localhost', port=8080, debug=True)

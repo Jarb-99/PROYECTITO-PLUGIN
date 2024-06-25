@@ -3,6 +3,9 @@ from connection import get_cassandra_session
 def deleteTables():
     session = get_cassandra_session()
 
+    #Eliminar los views
+    session.execute("DROP MATERIALIZED VIEW IF EXISTS prdcto_en_crrto_producto_id;")
+    
     # Eliminar las tablas
     session.execute("DROP TABLE IF EXISTS USUARIO;")
     session.execute("DROP TABLE IF EXISTS PROPIETARIO;")
@@ -22,3 +25,4 @@ def deleteTables():
     session.execute("DROP TYPE IF EXISTS PLUGIN;")
     session.execute("DROP TYPE IF EXISTS SCHEMATIC;")
     session.execute("DROP TYPE IF EXISTS RESPUESTA;")
+    

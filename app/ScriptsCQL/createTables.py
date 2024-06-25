@@ -73,7 +73,7 @@ def createTables():
         soporte_id UUID,
         mensaje TEXT,
         respuestas MAP<TIMESTAMP, FROZEN<RESPUESTA>>,
-        PRIMARY KEY ((usuario_id), fecha, soporte_id)
+        PRIMARY KEY ((usuario_id), fecha)
     ) WITH CLUSTERING ORDER BY (fecha DESC);
     """)
 
@@ -109,8 +109,19 @@ def createTables():
         usuario_id UUID,
         carrito_id UUID,
         producto_id UUID,
+        monto DECIMAL,
+        cantidad INT,
+        fecha_carrito TIMESTAMP,
         PRIMARY KEY (usuario_id, carrito_id, producto_id)
     );
+    """)
+    
+    session.execute("""
+    CREATE MATERIALIZED VIEW IF NOT EXISTS prdcto_en_crrto_producto_id AS
+    SELECT usuario_id, carrito_id, producto_id, fecha_carrito
+    FROM producto_en_carrito
+    WHERE producto_id IS NOT NULL AND usuario_id IS NOT NULL AND carrito_id IS NOT NULL
+    PRIMARY KEY (producto_id, usuario_id, carrito_id);
     """)
 
     session.execute("""

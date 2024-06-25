@@ -69,6 +69,7 @@ def generateDatas(dh, produ, start_index, hilo):
         cantidad_producto_anddo = fake.random_int(min=1, max=10)
         monto_producto_anddo = cantidad_producto_anddo*precio_producto
         monto_carrito = monto_producto_anddo
+        fecha_carrito = datetime_random(start_date,end_date)
         
         producto_anddo = {Prdcto_anddo(producto_id, nombre_producto, precio_producto, monto_producto_anddo, cantidad_producto_anddo)}
         
@@ -107,15 +108,15 @@ def generateDatas(dh, produ, start_index, hilo):
 
             # Generar datos de producto en carrito
             session.execute("""
-                INSERT INTO PRODUCTO_EN_CARRITO (carrito_id, producto_id, usuario_id)
-                VALUES (%s, %s, %s)
-            """, (carrito_id, producto_id, usuario_id))
+                INSERT INTO PRODUCTO_EN_CARRITO (carrito_id, producto_id, usuario_id, monto, cantidad, fecha_carrito)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (carrito_id, producto_id, usuario_id, monto_producto_anddo, cantidad_producto_anddo, fecha_carrito))
         
         # Generar datos de carritos
         session.execute("""
             INSERT INTO CARRITO (usuario_id, carrito_id, fecha, monto, productos)
             VALUES (%s, %s, %s, %s, %s)
-        """, (usuario_id, carrito_id, datetime_random(start_date,end_date), monto_carrito, producto_anddo))
+        """, (usuario_id, carrito_id, fecha_carrito, monto_carrito, producto_anddo))
 
         
         # Generar datos de pagos
@@ -153,7 +154,7 @@ def generateDatas(dh, produ, start_index, hilo):
     
 
 def insertDatas(d_ = 15000,p_ = 100):
-    h = 120  #cantidad de hilos [cassandra thead limit max:128]
+    h = 100  #cantidad de hilos [cassandra thead limit max:128]
     d = d_ #cantidad de datos
     dh = int(math.ceil(d/h)) #datos por hilo
     p = p_ #cantidad de productos
