@@ -16,7 +16,7 @@
             <div id="alert-success" class="alert alert-success" role="alert" style="display:none;">
                 ¡Soporte enviado exitosamente!
             </div>
-            <form id="soporteForm">
+            <form id="soporteForm" method="POST" action="{{ url_for('soporte') }}">
                 <div class="form-group">
                     <label for="mensaje">Mensaje:</label>
                     <textarea id="mensaje" name="mensaje" class="form-control" required></textarea>

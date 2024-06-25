@@ -1,0 +1,54 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+}
+
+.navbar {
+    margin-bottom: 20px;
+}
+
+.main-header {
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.product-card {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.product-card h5 {
+    margin-top: 0;
+}
+
+.product-card .btn {
+    margin-right: 5px;
+}
+
+.form-inline {
+    margin-bottom: 20px;
+}
+
+.add-product-form {
+    background-color: #fff;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.add-product-form h4 {
+    margin-bottom: 20px;
+}
+
+.form-control {
+    margin-bottom: 10px;
+}
+
+.modal-content {
+    padding: 20px;
+}

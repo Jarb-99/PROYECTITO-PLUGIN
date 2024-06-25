@@ -13,7 +13,7 @@ def createTables():
         cantidad INT
     );
     """)
-
+    
     session.execute("""
     CREATE TYPE IF NOT EXISTS METODO_PAGO (
         nombre TEXT,
@@ -69,21 +69,21 @@ def createTables():
     session.execute("""
     CREATE TABLE IF NOT EXISTS SOPORTE (
         usuario_id UUID,
-        soporte_id UUID,
         fecha TIMESTAMP,
+        soporte_id UUID,
         mensaje TEXT,
         respuestas MAP<TIMESTAMP, FROZEN<RESPUESTA>>,
-        PRIMARY KEY (usuario_id, soporte_id, fecha)
-    );
+        PRIMARY KEY ((usuario_id), fecha, soporte_id)
+    ) WITH CLUSTERING ORDER BY (fecha DESC);
     """)
 
     session.execute("""
     CREATE TABLE IF NOT EXISTS PRODUCTO (
         producto_id UUID,
+        fecha TIMESTAMP,
         nombre TEXT,
         descripcion TEXT,
         precio DECIMAL,
-        fecha TIMESTAMP,
         valoracion INT,
         compras INT,
         version_comptble TEXT,

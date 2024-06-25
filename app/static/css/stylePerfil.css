@@ -118,3 +118,8 @@ header .container {
     justify-content: space-between;
     align-items: center;
 }
+
+.no-link-style {
+    color: inherit; 
+    text-decoration: none;
+}

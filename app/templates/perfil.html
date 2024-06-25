@@ -21,25 +21,50 @@
                 <div class="col-md-6 mb-4">
                     <div class="card">
                         <div class="card-body">
-                            <h5 class="card-title">Información Personal</h5>
-                            <p class="card-text">Nombre: {{ usuario.nombre }} {{ usuario.apellido }}</p>
-                            <p class="card-text">Correo electrónico: {{ usuario.correo }}</p>
-                            <p class="card-text">Teléfono: {{ usuario.telefono }}</p>
-                            <p class="card-text">Dirección: {{ usuario.direccion }}</p>
-                            <p class="card-text">Fecha de union: {{ usuario.fecha_rgstro }}</p>
-                            <a href="#" class="btn btn-primary">Editar Perfil</a>
+                            <form id="editar-perfil-form" method="POST" action="{{ url_for('editar_perfil') }}">
+                                <h5 class="card-title">Información Personal</h5>
+                                
+                                <p class="card-text">Nombre: <span id="nombre-text">{{ usuario.nombre }}</span></p>
+                                <input type="text" class="form-control mb-2" id="nombre-input" name="nombre" style="display:none;" value="{{ usuario.nombre }}">
+
+                                <p class="card-text">Apellido: <span id="apellido-text">{{ usuario.apellido }}</span></p>
+                                <input type="text" class="form-control mb-2" id="apellido-input" name="apellido" style="display:none;" value="{{ usuario.apellido }}">
+
+                                <p class="card-text">Correo electrónico: <span id="correo-text">{{ usuario.correo }}</span></p>
+                                <input type="email" class="form-control mb-2" id="correo-input" name="correo" style="display:none;" value="{{ usuario.correo }}">
+
+                                <p class="card-text">Contraseña: <span id="contrasena-text">{{ usuario.contrasena }}</span></p>
+                                <input type="password" class="form-control mb-2" id="contrasena-input" name="contrasena" style="display:none;" value="{{ usuario.contrasena }}">
+
+                                <p class="card-text">Teléfono: <span id="telefono-text">{{ usuario.telefono }}</span></p>
+                                <input type="text" class="form-control mb-2" id="telefono-input" name="telefono" style="display:none;" value="{{ usuario.telefono }}">
+
+                                <p class="card-text">Dirección: <span id="direccion-text">{{ usuario.direccion }}</span></p>
+                                <input type="text" class="form-control mb-2" id="direccion-input" name="direccion" style="display:none;" value="{{ usuario.direccion }}">
+                                
+                                <p class="card-text">Fecha de unión: {{ usuario.fecha_rgstro }}</p>
+                                <p class="card-text">Usuario id: {{ usuario.usuario_id }}</p>
+                                
+                                
+                                <a href="#" class="btn btn-primary" id="editar-btn" onclick="mostrarEdicion()">Editar Perfil</a>
+                                <button type="submit" class="btn btn-success" id="subir-btn" style="display:none;">Subir</button>
+                                <a href="#" class="btn btn-secondary" id="cancelar-btn" style="display:none;" onclick="cancelarEdicion()">Cancelar</a>
+                            </form>
                         </div>
                     </div>
                 </div>
+
                 <div class="col-md-6 mb-4">
                     <div class="card">
                         <div class="card-body">
                             <h5 class="card-title">Historial de Compras</h5>
                             <ul class="list-group">
                                 {% for compra in compras %}
-                                <li class="list-group-item">
-                                    {{ compra.nombre }} - ${{ compra.precio }} (Cantidad: {{ compra.cantidad }})
-                                </li>
+                                <a href="{{ url_for('producto', producto_id=compra.producto_id) }}" class="no-link-style">    
+                                    <li class="list-group-item">
+                                        {{ compra.nombre }} - ${{ compra.precio }} (Cantidad: {{ compra.cantidad }})
+                                    </li>
+                                </a>
                                 {% endfor %}
                             </ul>
                         </div>
@@ -49,4 +74,48 @@
         </main>
     </div>
 </body>
+
+<script>
+    function mostrarEdicion() {
+        document.getElementById('nombre-text').style.display = 'none';
+        document.getElementById('apellido-text').style.display = 'none';
+        document.getElementById('correo-text').style.display = 'none';
+        document.getElementById('contrasena-text').style.display = 'none';
+        document.getElementById('telefono-text').style.display = 'none';
+        document.getElementById('direccion-text').style.display = 'none';
+    
+        document.getElementById('nombre-input').style.display = 'block';
+        document.getElementById('apellido-input').style.display = 'block';
+        document.getElementById('correo-input').style.display = 'block';
+        document.getElementById('contrasena-input').style.display = 'block';
+        document.getElementById('telefono-input').style.display = 'block';
+        document.getElementById('direccion-input').style.display = 'block';
+    
+        document.getElementById('editar-btn').style.display = 'none';
+        document.getElementById('subir-btn').style.display = 'inline-block';
+        document.getElementById('cancelar-btn').style.display = 'inline-block';
+    }
+    
+    function cancelarEdicion() {
+        document.getElementById('nombre-text').style.display = 'inline';
+        document.getElementById('apellido-text').style.display = 'inline';
+        document.getElementById('correo-text').style.display = 'inline';
+        document.getElementById('contrasena-text').style.display = 'inline';
+        document.getElementById('telefono-text').style.display = 'inline';
+        document.getElementById('direccion-text').style.display = 'inline';
+    
+        document.getElementById('nombre-input').style.display = 'none';
+        document.getElementById('apellido-input').style.display = 'none';
+        document.getElementById('correo-input').style.display = 'none';
+        document.getElementById('contrasena-input').style.display = 'none';
+        document.getElementById('telefono-input').style.display = 'none';
+        document.getElementById('direccion-input').style.display = 'none';
+    
+        document.getElementById('editar-btn').style.display = 'inline-block';
+        document.getElementById('subir-btn').style.display = 'none';
+        document.getElementById('cancelar-btn').style.display = 'none';
+    }
+    </script>
+
 </html>
+

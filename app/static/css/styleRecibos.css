@@ -118,3 +118,12 @@ header .container {
     align-items: center;
 }
 
+.no-link-style {
+    color: inherit; /* Hereda el color del elemento padre */
+    text-decoration: none; /* Elimina el subrayado */
+}
+
+.no-link-style:hover {
+    color: inherit; /* Mantiene el color al pasar el mouse */
+    text-decoration: none; /* Mantiene sin subrayado al pasar el mouse */
+}

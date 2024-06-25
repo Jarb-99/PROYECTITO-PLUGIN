@@ -27,13 +27,16 @@
                 <p class="card-text">Método de Pago: <strong>{{ recibo.metodo.nombre }}: {{ recibo.metodo.descripcion }}</strong></p>
                 <ul class="list-group mb-4">
                     {% for producto in recibo.productos %}
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="my-0">{{ producto.nombre }}</h6>
-                            <small class="text-muted">Cantidad: {{ producto.cantidad }}</small>
-                        </div>
-                        <span class="text-muted">${{ producto.precio }}</span>
-                    </li>
+                    <a href="{{ url_for('producto', producto_id=producto.producto_id) }}" class="no-link-style">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                    
+                                <h6 class="my-0">{{ producto.nombre }}</h6>
+                                <small class="text-muted">Cantidad: {{ producto.cantidad }}</small>
+                            </div>
+                            <span class="text-muted">${{ producto.precio }}</span>
+                        </li>
+                    </a>
                     {% endfor %}
                 </ul>
                 <h3>Total: $<span>{{ recibo.monto }}</span></h3>

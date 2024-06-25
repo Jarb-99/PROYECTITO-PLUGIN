@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Soportes</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styleSoporteAdmin.css') }}">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+</head>
+<body>
+    <header class="navbar navbar-expand-lg navbar-dark bg-dark">
+        {% include 'navbar_admin.html' %}
+    </header>
+    <div class="content">
+        <main class="container mt-2">
+            <h1 class="main-header">Lista de Soportes</h1>
+            
+            <form class="form-inline mb-4 mt-4" method="POST" action="{{ url_for('buscar_soporte_admin') }}">
+                <input class="form-control mr-sm-2" type="search" name="usuario_id" placeholder="Buscar Id de usuario" aria-label="Buscar">
+                <input class="form-control mr-sm-2" type="search" name="soporte_id" placeholder="Buscar Id de soporte" aria-label="Buscar">
+                <button class="btn btn-success mr-sm-2" type="submit">Buscar</button>
+            </form>
+
+            <div class="row" id="soportesList">
+                {% if soportes %}
+                    {% for soporte_id,soporte in soportes.items() %}
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card mb-4">
+                                <div class="card-body">
+                                    <form method="POST" action="{{ url_for('eliminar_soporte_admin') }}" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este soporte?');">
+                                        <input type="hidden" name="soporte_id" value="{{ soporte.soporte_id }}">
+                                        <input type="hidden" name="usuario_id" value="{{ soporte.usuario_id }}">
+                                        <input type="hidden" name="fecha" value="{{ soporte.fecha }}">
+
+                                        <button type="submit" class="btn btn-danger btn-sm float-right"  
+                                        >Borrar</button>
+                                    </form>
+                                    
+                                    <h5 class="card-title">Soporte ID: {{ soporte.soporte_id }}</h5>
+                                    <h5 class="card-title">Usuario ID: {{ soporte.usuario_id }}</h5>
+                                    <p class="card-text">Fecha: {{ soporte.fecha }}</p>
+                                    <p class="card-text">Mensaje: {{ soporte.mensaje }}</p>
+                                    <h6>Respuestas:</h6>
+                                    <ul class="list-group">
+                                        {% if soporte.respuestas %}
+                                            {% for timestamp, respuesta in soporte.respuestas.items() %}
+                                            <li class="list-group-item">
+                                                <strong>{{ respuesta.nombre_creador }}:</strong> {{ respuesta.mensaje }}
+                                                <br><small>{{ timestamp }}</small>
+                                            </li>                                     
+                                            {% endfor %}
+                                        {% endif %}
+                                        <button class="btn btn-link p-0" onclick="mostrarFormularioRespuesta('{{ soporte.soporte_id }}')">Responder</button>
+                                        <form id="form-respuesta-{{ soporte.soporte_id }}" class="mt-2" style="display: none;" method="POST" action="{{ url_for('responder_soporte_admin') }}">
+                                            <div class="form-group">
+                                                <textarea class="form-control" name="respuesta" rows="2" placeholder="Escribe tu respuesta..."></textarea>
+                                            </div>
+                                            <input type="hidden" name="soporte_id" value="{{ soporte.soporte_id }}">
+                                            <input type="hidden" name="fecha" value="{{ soporte.fecha }}">
+                                            <input type="hidden" name="usuario_id" value="{{ soporte.usuario_id }}">
+                                            <button type="submit" class="btn btn-success">Enviar</button>
+                                            <button type="button" class="btn btn-secondary" onclick="ocultarFormularioRespuesta('{{ soporte.soporte_id }}')">Cancelar</button>
+                                        </form>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function mostrarFormularioRespuesta(soporteId) {
+            var formId = 'form-respuesta-' + soporteId;
+            document.getElementById(formId).style.display = 'block';
+        }
+
+        function ocultarFormularioRespuesta(soporteId) {
+            var formId = 'form-respuesta-' + soporteId;
+            document.getElementById(formId).style.display = 'none';
+        }
+
+    </script>
+</body>
+</html>
