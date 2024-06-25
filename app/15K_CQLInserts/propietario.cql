@@ -1,1 +1,1 @@
-INSERT INTO propietario (administrador_id,usuario_id,nombre_usuario) VALUES (b115701c-cf65-45be-8995-7029563b90ac,c84b132c-c567-47a0-9102-423e44c22483,'Thomas');
+INSERT INTO propietario (administrador_id,usuario_id,nombre_usuario) VALUES (15a22f49-eceb-4ff3-a88c-776acb045313,5310374a-bb30-4e50-8caa-7caaea72311f,'Jennifer');
