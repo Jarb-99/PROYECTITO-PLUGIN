@@ -17,7 +17,7 @@ session = get_cassandra_session()
 #############################################
 # true/ false para activar la creacion de tablas en la base de datos
 # true = puede tardar un 1 minuto la cracion de las tablas   
-boolTables = False
+boolTables = True
 if boolTables:
     d = 15000 # cantidad de datos
     p = d # cantidad de productos
@@ -41,26 +41,25 @@ lista_productos = OrderedDict(sorted({producto.producto_id:producto._asdict() fo
 def start():
 	return render_template('login.html')
 
-@app.route('/index')
-def index():
-        
-    return render_template('index.html', usuario=sessionF, productos=lista_productos)
 
-@app.route('/index/s', methods=['GET','POST'])
-def buscar_producto():
-    if request.method == 'POST':
-        buscar = request.form['buscar'].lower()
-        
-        if buscar == '':
-            return redirect(url_for('index'))
-        
-        lista_productos_buscados = {producto_id:producto 
-                                    for producto_id,producto in lista_productos.items() 
-                                    if buscar in producto['nombre'].lower()}
-        
-        return render_template('index.html', usuario=sessionF, productos=lista_productos_buscados)
-    
-    return redirect(url_for('index'))
+
+
+
+##############################################################
+##############################################################
+##							LOGIN							##
+##															##
+##############################################################
+##############################################################
+
+
+
+
+@app.route('/Logout')
+def logout():
+    SM.clear(sessionF)
+    return render_template('login.html', usuario=sessionF)
+
 
 @app.route('/login', methods=['GET','POST'])
 def login():
@@ -137,6 +136,92 @@ def register():
 	return render_template('register.html')
 
 
+
+##############################################################
+##############################################################
+##							INDEX							##
+##															##
+##############################################################
+##############################################################
+
+
+
+@app.route('/index')
+def index():
+        
+    return render_template('index.html', usuario=sessionF, productos=lista_productos)
+
+@app.route('/index/s', methods=['GET','POST'])
+def buscar_producto():
+    if request.method == 'POST':
+        buscar = request.form['buscar'].lower()
+        
+        if buscar == '':
+            return redirect(url_for('index'))
+        
+        lista_productos_buscados = {producto_id:producto 
+                                    for producto_id,producto in lista_productos.items() 
+                                    if buscar in producto['nombre'].lower()}
+        
+        return render_template('index.html', usuario=sessionF, productos=lista_productos_buscados)
+    
+    return redirect(url_for('index'))
+
+
+
+
+##############################################################
+##############################################################
+##							PRODUCTO						##
+##															##
+##############################################################
+##############################################################
+
+
+@app.route('/PComprados')
+def PComprados():
+    compras_realizadas = session.execute("""
+		SELECT * FROM PRDCTO_CMPRDO 
+		WHERE usuario_id=%s 
+  		ORDER BY fecha DESC
+		""", (sessionF['usuario_id'],))
+    
+    return render_template('productos-comprados.html', usuario=sessionF, compras=compras_realizadas)
+
+@app.route('/producto/<uuid:producto_id>')
+def producto(producto_id):
+    
+    producto = session.execute("""
+        SELECT * FROM producto WHERE producto_id = %s
+    """, (producto_id,)).one()
+    
+    comentario_producto = session.execute("""
+        SELECT * FROM cmntrio_prdcto WHERE producto_id = %s
+    """, (producto_id,))
+    
+    lista_comentarios = [comentario._asdict() for comentario in comentario_producto]
+ 
+    if not producto:
+        return redirect(url_for('index'))
+
+    return render_template('producto.html', producto=producto, usuario=sessionF, lista_comentarios=lista_comentarios)
+
+
+
+
+
+
+##############################################################
+##############################################################
+##							PERFIL							##
+##															##
+##############################################################
+##############################################################
+
+
+
+
+
 @app.route('/Perfil')
 def perfil():
     compras_realizadas = session.execute("""
@@ -174,13 +259,30 @@ def editar_perfil():
     return redirect(url_for('perfil'))
 
 
+
+
+
+##############################################################
+##############################################################
+##							CARRITO							##
+##															##
+##############################################################
+##############################################################
+
+
+
+
+
+
 @app.route('/Carrito', methods=['GET', 'POST'])
 def carrito():
+    # seleccionar el carrito del usuario
     carrito = session.execute("""
 		SELECT * FROM carrito 
 		WHERE carrito_id=%s ALLOW FILTERING
 		""", (sessionF['carrito_id'],)).one()
     
+    # agregar un producto al carrito
     if request.method == 'POST':
         producto_id = UUID(request.form['producto_id'])
         
@@ -191,16 +293,23 @@ def carrito():
         edit_monto = 0
         edit_cantidad = 0
         
-        verify_product = None    
-        if carrito.productos:
-            for producto in carrito.productos:
-                if producto.producto_id == producto_id:
-                    verify_product = producto
-                    break
-            
         session.user_type_registered(keyspace, 'prdcto_anddo', Prdcto_anddo)
         
+        # verificar si el producto ya existe en el carrito
+        verify_product = None    
+        if carrito.productos:
+            verify_product = session.execute("""
+				SELECT producto_id FROM PRODUCTO_EN_CARRITO 
+				WHERE usuario_id=%s and producto_id=%s and carrito_id=%s
+				""", (sessionF['usuario_id'], producto_id, sessionF['carrito_id'])).one()
+            
+            #for producto in carrito.productos:
+            #    if producto.producto_id == producto_id:
+            #        verify_product = producto
+            #        break
+                
         if verify_product: 
+            # de existir el producto actualizarlo de carrito
             session.execute("""
 				UPDATE carrito 
 				SET productos = productos - %s, monto = %s 
@@ -210,14 +319,23 @@ def carrito():
             
             edit_monto = float(verify_product.monto)
             edit_cantidad = int(verify_product.cantidad)
+        else:
+            # de no existir se inserta el producto a producto_en_carrito
+            session.execute("""
+				INSERT INTO PRODUCTO_EN_CARRITO (carrito_id, producto_id usuario_id)
+				VALUES (%s, %s, %s)
+				""", (carrito.carrito_id, producto_id, sessionF['usuario_id']))
             
+        # insertar el nuevo producto en el carrito
         session.execute("""
 			UPDATE carrito 
 			SET productos = productos + %s, monto = %s 
 			WHERE carrito_id=%s AND usuario_id=%s AND fecha=%s 
 			""", 
 			({Prdcto_anddo(producto_id, nombre, precio, monto + edit_monto, cantidad + edit_cantidad)}, float(carrito.monto) + monto, carrito.carrito_id, carrito.usuario_id, carrito.fecha))
+
         
+        #recargar la lista de carrito 
         carrito = session.execute("""
 			SELECT * FROM carrito 
 			WHERE carrito_id=%s ALLOW FILTERING
@@ -249,6 +367,7 @@ def editar_producto_carrito():
         
         session.user_type_registered(keyspace, 'prdcto_anddo', Prdcto_anddo)
         
+        #actualizamos el carrito con la nueva informacion del producto editado
         session.execute("""
             UPDATE carrito 
             SET productos = productos -  %s, productos = productos  +  %s, monto = %s 
@@ -281,6 +400,7 @@ def eliminar_producto_carrito():
         
         session.user_type_registered(keyspace, 'prdcto_anddo', Prdcto_anddo)
         
+        #eliminamos el producto del carrito
         session.execute("""
 			UPDATE carrito 
 			SET productos = productos - %s, monto = %s 
@@ -291,7 +411,13 @@ def eliminar_producto_carrito():
 		carrito.carrito_id,
 		carrito.usuario_id,
 		carrito.fecha
-	))
+		))
+        
+        #eliminamos el producto de producto_en_carrito
+        session.execute("""
+			DELETE FROM PRODUCTO_EN_CARRITO 
+   			WHERE (usuario_id=%s, carrito_id=%s, producto_id=%s)
+			""", (sessionF['usuario_id'], carrito.carrito_id, producto_id))
     
     return redirect(url_for('carrito'))
 
@@ -315,12 +441,14 @@ def pagar_carrito():
         session.user_type_registered(keyspace, 'prdcto_anddo', Prdcto_anddo)
         session.user_type_registered(keyspace, 'metodo_pago', Metodo_pago)
         
+        #creamos un nuevo pago
         session.execute("""
             INSERT INTO PAGO (usuario_id, pago_id, carrito_id, fecha, monto, metodo)
             VALUES (%s, %s, %s, %s, %s, %s)
         """, 
         (carrito.usuario_id, pago_id, carrito.carrito_id, datestamp, carrito.monto, Metodo_pago(metodo_pago,correo)))
         
+        #creamos y agregamos en el recibo los productos que fueron comprados desde el carrito
         lista_productos_andddo = {Prdcto_anddo(producto.producto_id, producto.nombre, producto.precio, producto.monto, producto.cantidad) for producto in carrito.productos}
         
         session.execute("""
@@ -328,18 +456,21 @@ def pagar_carrito():
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         """, (carrito.usuario_id, recibo_id, carrito.carrito_id, pago_id, datestamp, carrito.monto, Metodo_pago(metodo_pago,correo), lista_productos_andddo))
         
+        #creamos el nuevo carrito para el usario
         session.execute("""
 			INSERT INTO CARRITO (usuario_id, carrito_id, fecha, monto, productos)
 			VALUES (%s, %s, %s, %s, %s)
 			""", (carrito.usuario_id, carrito_id, datestamp, 0, {}))
         
-        #inserta los produtos comprados       
+        #actualizamos los datos correspondiente al comprar un carrito       
         for product in carrito.productos:
+            #insertamos el producto a producto_comprado
             session.execute("""
 				INSERT INTO PRDCTO_CMPRDO (usuario_id, producto_id, fecha, nombre, precio, cantidad)
 				VALUES (%s, %s, %s, %s, %s, %s)
     		""", (carrito.usuario_id, product.producto_id, datestamp, product.nombre,product.precio, product.cantidad))
             
+            #actualizamos la informacion de nuemero de compras del producto
             num_compras = session.execute("""
 				SELECT compras,fecha FROM PRODUCTO
 				WHERE producto_id=%s 
@@ -352,7 +483,14 @@ def pagar_carrito():
 				""", (num_compras.compras + product.cantidad, product.producto_id, num_compras.fecha))
             
             lista_productos[product.producto_id]['compras'] =  num_compras.compras + product.cantidad
-   
+
+		#eliminamos todos los productos del carrito de la tabla producto_en_carrito
+        session.execute("""
+			DELETE FROM PRODUCTO_EN_CARRITO 
+   			WHERE (usuario_id=%s, carrito_id=%s)
+			""", (sessionF['usuario_id'], carrito.carrito_id))
+  
+		#actualizamos el nuevo carrito para el usuario
         SM.set(sessionF, 'carrito_id', carrito_id)
         session.execute("""
 			UPDATE USUARIO
@@ -362,6 +500,22 @@ def pagar_carrito():
         
         
     return redirect(url_for('recibo'))
+
+
+
+
+
+
+##############################################################
+##############################################################
+##							SOPORTE							##
+##															##
+##############################################################
+##############################################################
+
+
+
+
 
 @app.route('/Soporte', methods=['GET', 'POST'])
 def soporte():
@@ -382,21 +536,7 @@ def soporte():
         return redirect(url_for('LSoportes'))
 	
     return render_template('soporte.html', usuario=sessionF)
-     
-@app.route('/Logout')
-def logout():
-    SM.clear(sessionF)
-    return render_template('login.html', usuario=sessionF)
-
-@app.route('/PComprados')
-def PComprados():
-    compras_realizadas = session.execute("""
-		SELECT * FROM PRDCTO_CMPRDO 
-		WHERE usuario_id=%s 
-  		ORDER BY fecha DESC
-		""", (sessionF['usuario_id'],))
     
-    return render_template('productos-comprados.html', usuario=sessionF, compras=compras_realizadas)
 
 @app.route('/LSoportes')
 def LSoportes():
@@ -432,6 +572,20 @@ def responder_soporte():
 
     return redirect(url_for('LSoportes'))
 
+
+
+
+
+##############################################################
+##############################################################
+##							RECIBO							##
+##															##
+##############################################################
+##############################################################
+
+
+
+
 @app.route('/LRecibos')
 def LRecibos():
     recibos = session.execute("""
@@ -456,26 +610,6 @@ def recibo():
 	""", (sessionF['usuario_id'], )).one()
 
     return render_template('recibo.html', usuario=sessionF, recibo=recibo_reciente)
-
-
-@app.route('/producto/<uuid:producto_id>')
-def producto(producto_id):
-    
-    producto = session.execute("""
-        SELECT * FROM producto WHERE producto_id = %s
-    """, (producto_id,)).one()
-    
-    comentario_producto = session.execute("""
-        SELECT * FROM cmntrio_prdcto WHERE producto_id = %s
-    """, (producto_id,))
-    
-    lista_comentarios = [comentario._asdict() for comentario in comentario_producto]
- 
-    if not producto:
-        return redirect(url_for('index'))
-
-    return render_template('producto.html', producto=producto, usuario=sessionF, lista_comentarios=lista_comentarios)
-
 
 
 
@@ -749,4 +883,4 @@ def buscar_soporte_admin():
 
 
 if __name__ == '__main__':
-	app.run(host='localhost', port=8080, debug=True)
+	app.run(host='localhost', port=8080, debug=False)

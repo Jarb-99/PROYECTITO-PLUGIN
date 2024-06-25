@@ -13,7 +13,7 @@ def createTables():
         cantidad INT
     );
     """)
-    
+
     session.execute("""
     CREATE TYPE IF NOT EXISTS METODO_PAGO (
         nombre TEXT,
@@ -92,7 +92,7 @@ def createTables():
         PRIMARY KEY ((producto_id), fecha)
     ) WITH CLUSTERING ORDER BY (fecha DESC);
     """)
-
+    
     session.execute("""
     CREATE TABLE IF NOT EXISTS CARRITO (
         usuario_id UUID,
@@ -101,6 +101,15 @@ def createTables():
         monto DECIMAL,
         productos SET<FROZEN<PRDCTO_ANDDO>>,
         PRIMARY KEY (usuario_id, carrito_id, fecha)
+    ); 
+    """)
+
+    session.execute("""
+    CREATE TABLE IF NOT EXISTS PRODUCTO_EN_CARRITO (
+        usuario_id UUID,
+        carrito_id UUID,
+        producto_id UUID,
+        PRIMARY KEY (usuario_id, carrito_id, producto_id)
     );
     """)
 

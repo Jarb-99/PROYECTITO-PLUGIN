@@ -104,12 +104,19 @@ def generateDatas(dh, produ, start_index, hilo):
                 INSERT INTO PRODUCTO (producto_id, nombre, descripcion, precio, fecha, valoracion, compras, version_comptble, plugins, schematics)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (producto_id, nombre_producto, fake.sentence(), precio_producto, datetime_random(start_date,end_date), valoracion_producto, compras_producto, f'v{fake.random_digit()}', [Plugin(fake.random_element(elements=('1.0', '2.0', '3.0')))], [Schematic(fake.random_int(min=10, max=50))]))
+
+            # Generar datos de producto en carrito
+            session.execute("""
+                INSERT INTO PRODUCTO_EN_CARRITO (carrito_id, producto_id, usuario_id)
+                VALUES (%s, %s, %s)
+            """, (carrito_id, producto_id, usuario_id))
         
         # Generar datos de carritos
         session.execute("""
             INSERT INTO CARRITO (usuario_id, carrito_id, fecha, monto, productos)
             VALUES (%s, %s, %s, %s, %s)
         """, (usuario_id, carrito_id, datetime_random(start_date,end_date), monto_carrito, producto_anddo))
+
         
         # Generar datos de pagos
         session.execute("""

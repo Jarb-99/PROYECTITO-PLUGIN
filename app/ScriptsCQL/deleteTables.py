@@ -14,6 +14,7 @@ def deleteTables():
     session.execute("DROP TABLE IF EXISTS PRDCTO_CMPRDO;")
     session.execute("DROP TABLE IF EXISTS CMNTRIO_PRDCTO;")
     session.execute("DROP TABLE IF EXISTS VALORAR_PRODUCTO;")
+    session.execute("DROP TABLE IF EXISTS PRODUCTO_EN_CARRITO;")
 
     # Eliminar los tipos de datos
     session.execute("DROP TYPE IF EXISTS PRDCTO_ANDDO;")
