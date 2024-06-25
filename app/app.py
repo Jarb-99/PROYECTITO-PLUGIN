@@ -19,15 +19,14 @@ session = get_cassandra_session()
 # true = puede tardar un 1 minuto la cracion de las tablas   
 boolTables = False
 if boolTables:
-    d = 100 # cantidad de datos
+    d = 15000 # cantidad de datos
     p = d # cantidad de productos
     deleteTables.deleteTables()
     createTables.createTables()
     insert.insertDatas(d,p)  
 
 #############################################
-# global de productos para ahorrar las consultas por usuarios
-
+# global de lista productos ordenados para ahorrar las consultas por usuarios
 lista_productos = OrderedDict(sorted({producto.producto_id:producto._asdict() for producto in 
 	session.execute("""
 		SELECT * FROM producto
@@ -897,7 +896,6 @@ def responder_soporte_admin():
     # para responder un soporte de un usuario 
     if request.method == 'POST':
         respuesta = request.form.get('respuesta')
-        soporte_id = UUID(request.form.get('soporte_id'))
         usuario_id = UUID(request.form.get('usuario_id'))
         fecha = request.form.get('fecha')
         fecha = datetime.strptime(fecha, '%Y-%m-%d %H:%M:%S.%f')
@@ -982,4 +980,4 @@ def buscar_soporte_admin():
 
 
 if __name__ == '__main__':
-	app.run(host='localhost', port=8080, debug=True)
+	app.run(host='localhost', port=8080, debug=False)
