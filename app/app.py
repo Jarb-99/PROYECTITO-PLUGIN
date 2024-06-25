@@ -106,6 +106,7 @@ def register():
 		correo = request.form['email']
 		contrasena = request.form['password']
 		
+		# verificar si el usuario ya existe, si no registrarlo
 		usuario = session.execute("""
 		SELECT correo FROM usuario 
 		WHERE correo=%s AND contrasena=%s ALLOW FILTERING
@@ -120,7 +121,8 @@ def register():
 			carrito_id = uuid4()
 			datestamp = datetime.now()
 			date = datestamp.date()
-
+			
+   			# actualizar la session del usuario y insertar a la BD
 			SM.set_usuario(sessionF, usuario_id, carrito_id, nombre, apellido, correo, contrasena, date.strftime("%Y-%m-%d"), '', '', '')
 
 			session.execute("""
@@ -128,7 +130,8 @@ def register():
 					VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
 				""", 
 				(usuario_id, carrito_id, nombre, apellido, correo, contrasena, date, '', '', ''))
-
+   
+			# Crear el nuevo carrito del usuario
 			session.user_type_registered(keyspace, 'prdcto_anddo', Prdcto_anddo)
 			session.execute("""
 				INSERT INTO CARRITO (usuario_id, carrito_id, fecha, monto, productos)
@@ -162,6 +165,7 @@ def buscar_producto():
         if buscar == '':
             return redirect(url_for('index'))
         
+        #Buscador del producto con codigo de aplicacion
         lista_productos_buscados = {producto_id:producto 
                                     for producto_id,producto in lista_productos.items() 
                                     if buscar in producto['nombre'].lower()}
@@ -183,6 +187,7 @@ def buscar_producto():
 
 @app.route('/PComprados')
 def PComprados():
+    # Seleccionar los productos ya comprados por el usuario para mostrarlo
     compras_realizadas = session.execute("""
 		SELECT * FROM PRDCTO_CMPRDO 
 		WHERE usuario_id=%s 
@@ -193,11 +198,11 @@ def PComprados():
 
 @app.route('/producto/<uuid:producto_id>')
 def producto(producto_id):
-    
+    #para ver la informacion del producto
+    # validar si existe el producto
     producto = session.execute("""
         SELECT * FROM producto WHERE producto_id = %s
     """, (producto_id,)).one()
-
     if not producto:
         return redirect(url_for('index'))
         
@@ -228,6 +233,7 @@ def producto(producto_id):
 
 @app.route('/Perfil')
 def perfil():
+    # para cargar los productos(3) ya comprados por usuario y mostrarlo en su perfil de informacion
     compras_realizadas = session.execute("""
 		SELECT * FROM PRDCTO_CMPRDO 
 		WHERE usuario_id=%s 
@@ -239,6 +245,7 @@ def perfil():
 
 @app.route('/Perfil/editar', methods=['POST'])
 def editar_perfil():
+    # para editar el perfil del usuario
     nombre = request.form.get('nombre')
     apellido = request.form.get('apellido')
     correo = request.form.get('correo')
@@ -246,6 +253,7 @@ def editar_perfil():
     telefono = request.form.get('telefono')
     direccion = request.form.get('direccion')
     
+    # actualizar la informacion en la session y en la BD del usuario 
     SM.set(sessionF, 'nombre', nombre)
     SM.set(sessionF, 'apellido', apellido)
     SM.set(sessionF, 'correo', correo)
@@ -376,6 +384,7 @@ def editar_producto_carrito():
         nueva_cantidad = int(request.form['nuevacantidad'])
         cantidad = int(request.form['cantidad'])
         
+        # para evitar la sobre carga de productos
         if cantidad == 1 and nueva_cantidad == 1:
             return redirect(url_for('carrito'))
         
@@ -385,6 +394,7 @@ def editar_producto_carrito():
         carrito_monto = float(request.form['carrito_monto'])
         nuevo_monto_producto = nueva_cantidad*precio
         
+        # Seleccionar la informacion de nuestro carrito
         carrito = session.execute("""
 			SELECT * FROM carrito 
 			WHERE carrito_id=%s ALLOW FILTERING
@@ -563,14 +573,17 @@ def pagar_carrito():
 @app.route('/Soporte', methods=['GET', 'POST'])
 def soporte():
     if request.method == 'POST':
-        mensaje = request.form.get('mensaje')
+        # para crear un soporte
         
+        mensaje = request.form.get('mensaje')
+        # por si el mensaje esta vacio 
         if mensaje == ' ':
             return redirect(url_for('index'))
         
         soporte_id = uuid4()
         datestamp = datetime.now()
         
+        # insertar el nuevo soporte
         session.execute("""
             INSERT INTO SOPORTE (usuario_id, soporte_id, fecha, mensaje, respuestas)
             VALUES (%s, %s, %s, %s, {})
@@ -583,6 +596,7 @@ def soporte():
 
 @app.route('/LSoportes')
 def LSoportes():
+    # para visualizar los soportes creados
 	lista_soportes = session.execute("""
 		SELECT * FROM soporte 
 		WHERE usuario_id=%s
@@ -593,6 +607,7 @@ def LSoportes():
 
 @app.route('/LSoportes/resp', methods=['POST'])
 def responder_soporte():
+    # para responder los soportes creados
     if request.method == 'POST':
         #revisar si existe el soporte
         soporte_id = UUID(request.form.get('soporte_id'))
@@ -604,6 +619,7 @@ def responder_soporte():
         if not soporte:
             return redirect(url_for('LSoportes'))
         
+        # agregar una respuesta a un soporte
         respuesta = request.form.get('respuesta')
         
         fecha = request.form.get('fecha')
@@ -640,12 +656,14 @@ def responder_soporte():
 
 @app.route('/LRecibos')
 def LRecibos():
+    # Visualizar la lista de lso recibos
     recibos = session.execute("""
 		SELECT * FROM recibo
 		WHERE usuario_id=%s 
   		ORDER BY fecha DESC
 		""", (sessionF['usuario_id'], ))
     
+    # Para usar la lista en el html en forma de diccionario
     lista_recibos = [recibo._asdict() for recibo in recibos]
     
     
@@ -654,6 +672,7 @@ def LRecibos():
 
 @app.route('/recibo')
 def recibo():
+    # para ver la informacion del recibo creado en una solo pagina
     recibo_reciente = session.execute("""
 		SELECT * FROM recibo 
 		WHERE usuario_id=%s 
@@ -676,17 +695,20 @@ def recibo():
 
 @app.route('/index/admin')
 def index_admin():
-        
+    # cargar los productos en el indice para su edicion
     return render_template('index_admin.html', usuario=sessionF, productos=lista_productos)
 
 @app.route('/index/admin/s', methods=['GET','POST'])
 def buscar_producto_admin():
+    # para buscar productos por su nombre
     if request.method == 'POST':
         buscar = request.form['buscar'].lower()
         
+        # evitar busqueda vacia
         if buscar == '':
             return redirect(url_for('index_admin'))
         
+        # para encontrar los productos por su nombre en forma de diccionario 
         lista_productos_buscados = {producto_id:producto 
                                     for producto_id,producto in lista_productos.items() 
                                     if buscar in producto['nombre'].lower()}
@@ -697,6 +719,7 @@ def buscar_producto_admin():
 
 @app.route('/index/admin/add', methods=['POST'])
 def agregar_producto_admin():
+    # para agregar productos nuevos
     if request.method == 'POST':
         global lista_productos
         nombre = request.form['nombre']
@@ -713,12 +736,14 @@ def agregar_producto_admin():
     
         plugins_list = [Plugin(version) for version in plugins]
         schematics_list = [Schematic(int(dimensiones)) for dimensiones in schematics]
-    
+        
+		# insertar el nuevo producto con los datos ingresados
         session.execute("""
         	INSERT INTO producto (producto_id, nombre, descripcion, precio, fecha, valoracion, compras, version_comptble, plugins, schematics)
         	VALUES (%s, %s, %s, %s, %s, 0, 0, %s, %s, %s)
     	""", (producto_id, nombre, descripcion, precio, fecha, version_comptble, plugins_list, schematics_list))
 
+		#Para actualizar nuestro diccionario global que ayuda a la eficiencia
         nuevo_producto = {
             'producto_id': producto_id,
             'nombre': nombre,
@@ -739,10 +764,12 @@ def agregar_producto_admin():
 
 @app.route('/index/admin/edit', methods=['POST'])
 def editar_producto_admin():
-    
+    # para editar o eliminar un producto 
     if request.method == 'POST':
         accion = request.form.get('accion')
         producto_id = None
+        
+        # para editar el producto
         if 'confirmar' in accion:
             nombre = request.form['nombre']
             descripcion = request.form['descripcion']
@@ -752,10 +779,11 @@ def editar_producto_admin():
             fecha = request.form['fecha']
             fecha = datetime.strptime(fecha, '%Y-%m-%d %H:%M:%S.%f')
             producto_id = UUID(request.form['producto_id'])
-        
+
             session.user_type_registered(keyspace, 'plugin', Plugin)
             session.user_type_registered(keyspace, 'schematic', Schematic)
-        
+			
+   			#Actualiza la informacion del producto en la BD y en global
             session.execute("""
 				UPDATE PRODUCTO 
 				SET nombre=%s, descripcion=%s, precio=%s, version_comptble=%s 
@@ -767,13 +795,15 @@ def editar_producto_admin():
             lista_productos[producto_id]['precio'] = precio
             lista_productos[producto_id]['version_comptble'] = version_comptble
         
+        # si se elimina el producto
         elif 'eliminar' in accion:   
             producto_id = UUID(request.form['producto_id'])	
             fecha = request.form['fecha']
             fecha = datetime.strptime(fecha, '%Y-%m-%d %H:%M:%S.%f')
         
             session.user_type_registered(keyspace, 'prdcto_anddo', Prdcto_anddo)
-        
+
+			#eliminar el producto de la BD y del global
             session.execute("""
 				DELETE FROM PRODUCTO  
 				WHERE producto_id = %s AND fecha = %s
@@ -781,17 +811,17 @@ def editar_producto_admin():
         
             del lista_productos[producto_id]
             
-        #buscar en los producto_en_carrito el producto editado para vaciar todo los productos de los carritos y de producto_en_carrito
+        # buscar en el producto editado en las tablas para vaciar todo los productos de los carritos y de producto_en_carrito que contengan el producto 
+        # usamos la ayuda de la view prdcto_en_crrto_producto_id de PRODUCTO_EN_CARRITO
         carritosFind = session.execute("""
 			SELECT carrito_id,producto_id,usuario_id,fecha_carrito 
    			FROM prdcto_en_crrto_producto_id  
 			WHERE producto_id = %s ALLOW FILTERING
 			""", (producto_id, ))
         
+        # si se encontro el producto procedemos con la eliminacion
         if carritosFind:
             for carrito in carritosFind:
-                print("AAAAAAA")
-                print(carrito)	
                 session.execute("""
     			    UPDATE carrito 
     			    SET productos = {}, monto=0 
@@ -810,6 +840,7 @@ def editar_producto_admin():
 
 @app.route('/Perfil/admin')
 def perfil_admin():
+    # para mostrar la informacion del administrador con sus 3 primeras compras
     compras_realizadas = session.execute("""
 		SELECT * FROM PRDCTO_CMPRDO 
 		WHERE usuario_id=%s 
@@ -821,6 +852,7 @@ def perfil_admin():
 
 @app.route('/Perfil/admin/editar', methods=['POST'])
 def editar_perfil_admin():
+    # para editar la informacion del administrador de la bd y en global
     nombre = request.form.get('nombre')
     apellido = request.form.get('apellido')
     correo = request.form.get('correo')
@@ -847,12 +879,13 @@ def editar_perfil_admin():
 
 @app.route('/LSoportes/admin')
 def soporte_admin(): 
+    # para ver los soportes creados por los usuarios ordenados
     lista_soportes = OrderedDict(sorted({soporte.usuario_id:soporte._asdict() for soporte in 
-                   session.execute("""
-						SELECT * FROM soporte 
-						LIMIT 100
-						""")
-                   }.items(), key=lambda x: x[1]['fecha'], reverse=True))
+		session.execute("""
+			SELECT * FROM soporte 
+			LIMIT 100
+			""")
+		}.items(), key=lambda x: x[1]['fecha'], reverse=True))
     	
     
     
@@ -861,6 +894,7 @@ def soporte_admin():
 
 @app.route('/LSoportes/admin/resp', methods=['POST'])
 def responder_soporte_admin():
+    # para responder un soporte de un usuario 
     if request.method == 'POST':
         respuesta = request.form.get('respuesta')
         soporte_id = UUID(request.form.get('soporte_id'))
@@ -870,7 +904,7 @@ def responder_soporte_admin():
         datestamp = datetime.now()
         
         session.user_type_registered(keyspace, 'respuesta', Respuesta)
-        
+        # ingresar la nueva respeusta al soporte del usuario
         session.execute("""
             UPDATE soporte
             SET respuestas = respuestas +  %s 
@@ -886,6 +920,7 @@ def responder_soporte_admin():
 
 @app.route('/LSoportes/admin/del', methods=['POST'])
 def eliminar_soporte_admin():
+    # para eliminar un soporte del usuario
     if request.method == 'POST':       
         soporte_id = UUID(request.form.get('soporte_id'))	
         usuario_id = UUID(request.form.get('usuario_id'))	
@@ -901,14 +936,18 @@ def eliminar_soporte_admin():
 
 @app.route('/LSoportes/admin/s', methods=['GET','POST'])
 def buscar_soporte_admin():
+    # para buscar un soporte por su id o/y por el id el usuario
     if request.method == 'POST':
         usuario_id = request.form['usuario_id']
         soporte_id = request.form['soporte_id']
         
         lista_soportes_buscados = {}
         
+        # busqueda en blanco
         if usuario_id == '' and soporte_id == '':
             return redirect(url_for('soporte_admin'))
+        
+        # busqueda por id de usuario 
         elif soporte_id == '':
             lista_soportes_buscados=OrderedDict({soporte.soporte_id:soporte._asdict() for soporte in 
 			session.execute("""
@@ -918,12 +957,15 @@ def buscar_soporte_admin():
     			LIMIT 100 
 			""", (UUID(usuario_id), ))}.items())
         
+        # busqueda por id de soporte 
         elif usuario_id == '':
             lista_soportes_buscados=OrderedDict({soporte.soporte_id:soporte._asdict() for soporte in 
 			session.execute("""
 				SELECT * FROM SOPORTE  
 				WHERE soporte_id = %s ALLOW FILTERING
 			""", (UUID(soporte_id), ))}.items())
+            
+        # busqueda por id de soporte y usuario
         else:
             lista_soportes_buscados=OrderedDict({soporte.soporte_id:soporte._asdict() for soporte in 
 			session.execute("""
