@@ -1,9 +1,13 @@
 from cassandra.cluster import Cluster
-keyspace = 'DataBaseProject'
 
-# Conectar
+keyspace = 'databaseproject'
+
 def get_cassandra_session():
-    # Conectar
-    cluster = Cluster(['localhost'])
-    session = cluster.connect(keyspace)  # nombre de la base de datos
-    return session
+    try:
+        cluster = Cluster(['127.0.0.1'], port=9042)
+        session = cluster.connect(keyspace)  # usa 'databaseproject' en minúsculas
+        print("Conexión a Cassandra establecida correctamente.")
+        return session
+    except Exception as e:
+        print(f"Error al conectar con Cassandra: {e}")
+        return None

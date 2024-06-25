@@ -1,84 +1,88 @@
+<!DOCTYPE html>
 <html lang="es">
-    <!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carrito</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/stylesCarrito.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
     <header class="navbar navbar-expand-lg navbar-dark bg-dark">
         {% include 'navbar.html' %}        
     </header>
 
-
     <div class="container mt-4">
         <h1>Carrito de Compras</h1>
-        <section id="carrito">
-            <ul id="listaCarrito" class="list-group mb-4">
-                {% if carrito.productos %}
-                    {% for producto in carrito.productos %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                                <h5>{{ producto.nombre }}</h5>
-                                <p>Precio: ${{ producto.precio }}</p>
-                                <p>Cantidad: {{ producto.cantidad }}</p>
-                                <p>Monto: ${{ producto.monto }}</p>
-                            </div>
-                            <div>
-                                <form action="{{ url_for('editar_producto_carrito') }}" method="POST" class="d-inline">
-                                    <input type="hidden" name="producto_id" value="{{ producto.producto_id }}">
-                                    <input type="hidden" name="precio" value="{{ producto.precio }}">
-                                    <input type="hidden" name="nombre" value="{{ producto.nombre }}">
-                                    <input type="hidden" name="cantidad" value="{{ producto.cantidad }}">
-                                    <input type="hidden" name="producto_monto" value="{{ producto.monto }}">
-                                    <input type="hidden" name="carrito_monto" value="{{ carrito.monto }}">
-                                    
-                                    <input type="number" name="nuevacantidad" value="1" min="1" class="form-control mb-2">
-                                    <button type="submit" class="btn btn-primary">Editar</button>
-                                </form>
-                                <form action="{{ url_for('eliminar_producto_carrito') }}" method="POST" class="d-inline">
-                                    <input type="hidden" name="producto_id" value="{{ producto.producto_id }}">
-                                    <input type="hidden" name="precio" value="{{ producto.precio }}">
-                                    <input type="hidden" name="nombre" value="{{ producto.nombre }}">
-                                    <input type="hidden" name="cantidad" value="{{ producto.cantidad }}">
-                                    <input type="hidden" name="producto_monto" value="{{ producto.monto }}">
-                                    <input type="hidden" name="carrito_monto" value="{{ carrito.monto }}">
+        <div class="row">
+            <div class="col-md-8">
+                <section id="carrito">
+                    <ul id="listaCarrito" class="list-group mb-4">
+                        {% if carrito.productos %}
+                            {% for producto in carrito.productos %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5>{{ producto.nombre }}</h5>
+                                        <p>Precio: ${{ producto.precio }}</p>
+                                        <p>Cantidad: {{ producto.cantidad }}</p>
+                                        <p>Monto: ${{ producto.monto }}</p>
+                                    </div>
+                                    <div>
+                                        <form action="{{ url_for('editar_producto_carrito') }}" method="POST" class="d-inline">
+                                            <input type="hidden" name="producto_id" value="{{ producto.producto_id }}">
+                                            <input type="hidden" name="precio" value="{{ producto.precio }}">
+                                            <input type="hidden" name="nombre" value="{{ producto.nombre }}">
+                                            <input type="hidden" name="cantidad" value="{{ producto.cantidad }}">
+                                            <input type="hidden" name="producto_monto" value="{{ producto.monto }}">
+                                            <input type="hidden" name="carrito_monto" value="{{ carrito.monto }}">
+                                            
+                                            <input type="number" name="nuevacantidad" value="1" min="1" class="form-control mb-2">
+                                            <button type="submit" class="btn btn-primary">Editar</button>
+                                        </form>
+                                        <form action="{{ url_for('eliminar_producto_carrito') }}" method="POST" class="d-inline">
+                                            <input type="hidden" name="producto_id" value="{{ producto.producto_id }}">
+                                            <input type="hidden" name="precio" value="{{ producto.precio }}">
+                                            <input type="hidden" name="nombre" value="{{ producto.nombre }}">
+                                            <input type="hidden" name="cantidad" value="{{ producto.cantidad }}">
+                                            <input type="hidden" name="producto_monto" value="{{ producto.monto }}">
+                                            <input type="hidden" name="carrito_monto" value="{{ carrito.monto }}">
 
-                                    <button type="submit" class="btn btn-danger">Eliminar</button>
-                                </form>
+                                            <button type="submit" class="btn btn-danger">Eliminar</button>
+                                        </form>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        {% else %}
+                            <li class="list-group-item">El carrito está vacío.</li>
+                        {% endif %}
+                    </ul>
+                </section>
+            </div>
+            <div class="col-md-4">
+                <div class="total-container">
+                    <h3>Total: $<span id="totalCarrito">{{ carrito.monto }}</span></h3>
+                    {% if carrito.productos %}
+                        <form action="{{ url_for('pagar_carrito') }}" method="POST">
+                            <div class="form-group">
+                                <label for="metodoPago">Método de Pago:</label>
+                                <select id="metodoPago" name="metodoPago" class="form-control" onchange="toggleCorreoInput()">
+                                    <option value="">Selecciona un método de pago</option>
+                                    <option value="tarjeta">Tarjeta</option>
+                                    <option value="paypal">Paypal</option>
+                                </select>
                             </div>
-                        </li>
-                    {% endfor %}
-                {% else %}
-                    <li class="list-group-item">El carrito está vacío.</li>
-                {% endif %}
-            </ul>
-            <h3>Total: $<span id="totalCarrito">{{ carrito.monto }}</span></h3>
-
-            {% if carrito.productos %}
-                <form action="{{ url_for('pagar_carrito') }}" method="POST">
-                    <div class="form-group">
-                        <label for="metodoPago">Método de Pago:</label>
-                        <select id="metodoPago" name="metodoPago" class="form-control" onchange="toggleCorreoInput()">
-                            <option value="">Selecciona un método de pago</option>
-                            <option value="tarjeta">Tarjeta</option>
-                            <option value="paypal">Paypal</option>
-                        </select>
-                    </div>
-                    <div class="form-group" id="correoInput" style="display: none;">
-                        <label for="correo">Correo:</label>
-                        <input type="email" id="correo" name="correo" class="form-control" required>
-                    </div>
-                    
-                    <button type="submit" id="pagarBtn" class="btn btn-success">Pagar</button>
-                </form>
-            {% else %}
-                <a href="{{ url_for('index') }}" class="btn btn-success">Ver productos</a>
-            {% endif %}
-        </section>
+                            <div class="form-group" id="correoInput" style="display: none;">
+                                <label for="correo">Correo:</label>
+                                <input type="email" id="correo" name="correo" class="form-control" required>
+                            </div>
+                            <button type="submit" id="pagarBtn" class="btn btn-success">Pagar</button>
+                        </form>
+                    {% else %}
+                        <a href="{{ url_for('index') }}" class="btn btn-success">Ver productos</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>

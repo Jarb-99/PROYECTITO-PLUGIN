@@ -9,12 +9,12 @@
 <body>
     <header class="navbar navbar-expand-lg navbar-dark bg-dark">
         {% include 'navbar.html' %}
+    </header>
         <div class="sidebar">
             <a href="{{ url_for('PComprados') }}">Productos Comprados</a>
             <a href="{{ url_for('LSoportes') }}">Soportes</a>
             <a href="{{ url_for('LRecibos') }}">Recibos</a>
         </div>
-    </header>
     <div class="content">
         <main class="container mt-5">
             <div class="row">
