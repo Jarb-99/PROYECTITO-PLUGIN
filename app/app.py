@@ -17,13 +17,14 @@ session = get_cassandra_session()
 #############################################
 # true/ false para activar la creacion de tablas en la base de datos
 # true = puede tardar un 1 minuto la cracion de las tablas   
-boolTables = True
+boolTables = False
 if boolTables:
     d = 15000 # cantidad de datos
     p = d # cantidad de productos
+    h = 120
     deleteTables.deleteTables()
     createTables.createTables()
-    insert.insertDatas(d,p)  
+    insert.insertDatas(d,p,h)  
 
 #############################################
 # global de lista productos ordenados para ahorrar las consultas por usuarios
@@ -471,6 +472,7 @@ def eliminar_producto_carrito():
 
 @app.route('/Carrito/pag', methods=['POST'])
 def pagar_carrito():
+    global lista_productos
     if request.method == 'POST':
         carrito = session.execute("""
 			SELECT * FROM carrito 
@@ -524,7 +526,7 @@ def pagar_carrito():
             
             #actualizamos la informacion de nuemero de compras del producto
             num_compras = session.execute("""
-				SELECT compras,fecha FROM PRODUCTO
+				SELECT compras,fecha,producto_id FROM PRODUCTO
 				WHERE producto_id=%s 
 				""", (product.producto_id, )).one()
             
@@ -534,8 +536,14 @@ def pagar_carrito():
 				WHERE producto_id=%s AND fecha=%s 
 				""", (num_compras.compras + product.cantidad, product.producto_id, num_compras.fecha))
             
-            lista_productos[product.producto_id]['compras'] =  num_compras.compras + product.cantidad
-
+            #lista_productos[num_compras.producto_id]['compras'] =  num_compras.compras + product.cantidad
+            lista_productos = OrderedDict(sorted({producto.producto_id:producto._asdict() 
+                for producto in 
+                session.execute("""
+                    SELECT * FROM producto
+                    LIMIT 100
+                    """)
+                }.items(), key=lambda x: x[1]['fecha'], reverse=True))
 		#eliminamos todos los productos del carrito de la tabla producto_en_carrito
         session.execute("""
 			DELETE FROM PRODUCTO_EN_CARRITO 
