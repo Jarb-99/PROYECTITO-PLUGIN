@@ -19,9 +19,9 @@ session = get_cassandra_session()
 # true = puede tardar un 1 minuto la cracion de las tablas   
 boolTables = False
 if boolTables:
-    d = 15000 # cantidad de datos
+    d = 20000 # cantidad de datos
     p = d # cantidad de productos
-    h = 120
+    h = 60
     deleteTables.deleteTables()
     createTables.createTables()
     insert.insertDatas(d,p,h)  
@@ -165,10 +165,16 @@ def buscar_producto():
         if buscar == '':
             return redirect(url_for('index'))
         
+        productos = OrderedDict(sorted({producto.producto_id:producto._asdict() for producto in 
+            session.execute("""
+                SELECT * FROM producto
+                """)
+            }.items(), key=lambda x: x[1]['fecha'], reverse=True))
+        
         #Buscador del producto con codigo de aplicacion
         lista_productos_buscados = {producto_id:producto 
-                                    for producto_id,producto in lista_productos.items() 
-                                    if buscar in producto['nombre'].lower()}
+                                    for producto_id,producto in productos.items() 
+                                    if buscar == producto['nombre'].lower()}
         
         return render_template('index.html', usuario=sessionF, productos=lista_productos_buscados)
     
@@ -715,10 +721,16 @@ def buscar_producto_admin():
         if buscar == '':
             return redirect(url_for('index_admin'))
         
+        productos = OrderedDict(sorted({producto.producto_id:producto._asdict() for producto in 
+            session.execute("""
+                SELECT * FROM producto
+                """)
+            }.items(), key=lambda x: x[1]['fecha'], reverse=True))
+        
         # para encontrar los productos por su nombre en forma de diccionario 
         lista_productos_buscados = {producto_id:producto 
-                                    for producto_id,producto in lista_productos.items() 
-                                    if buscar in producto['nombre'].lower()}
+                                    for producto_id,producto in productos.items() 
+                                    if buscar == producto['nombre'].lower()}
         
         return render_template('index_admin.html', usuario=sessionF, productos=lista_productos_buscados)
     
@@ -815,9 +827,11 @@ def editar_producto_admin():
 				DELETE FROM PRODUCTO  
 				WHERE producto_id = %s AND fecha = %s
 			""", (producto_id, fecha))
-        
-            del lista_productos[producto_id]
             
+            try: 
+                del lista_productos[producto_id]
+            except:
+                pass
         # buscar en el producto editado en las tablas para vaciar todo los productos de los carritos y de producto_en_carrito que contengan el producto 
         # usamos la ayuda de la view prdcto_en_crrto_producto_id de PRODUCTO_EN_CARRITO
         carritosFind = session.execute("""
@@ -938,7 +952,7 @@ def eliminar_soporte_admin():
 			WHERE fecha = %s AND usuario_id=%s
 		""", (fecha, usuario_id))
     
-    return redirect(url_for('soporte_admin'))
+    return redirect(url_for('buscar_soporte_admin'))
 
 @app.route('/LSoportes/admin/s', methods=['GET','POST'])
 def buscar_soporte_admin():
