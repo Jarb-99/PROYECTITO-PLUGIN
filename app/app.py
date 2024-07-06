@@ -713,8 +713,10 @@ def index_admin():
 @app.route('/index/admin/s', methods=['GET','POST'])
 def buscar_producto_admin():
     # para buscar productos por su nombre
-    sessionF['sp_producto_id'] = None
-    sessionF['sp_nombre'] = None
+    
+    if not 'sp_producto_id' in sessionF:
+        sessionF['sp_producto_id'] = None
+        sessionF['sp_nombre'] = None
     
     if request.method == 'POST':
         nombre = request.form['nombre']
@@ -727,33 +729,32 @@ def buscar_producto_admin():
     producto_id = sessionF['sp_producto_id']
     productos = None
     
+    
+    query = "SELECT * FROM producto WHERE "
+    query_conditions = []
+    end_conditions = []
+    params = []
+
     # evitar busqueda vacia
     if not nombre  and not producto_id:
-        return redirect(url_for('index_admin'))
+        return redirect(url_for('index_admin'))    
     
-    elif producto_id == '':
-        productos = OrderedDict(sorted({producto.producto_id:producto._asdict() for producto in 
-            session.execute("""
-                SELECT * FROM producto
-                where nombre = %s ALLOW FILTERING
-                """, (nombre, ))
-            }.items(), key=lambda x: x[1]['fecha'], reverse=True))
+    if producto_id:
+        query_conditions.append("producto_id = %s")
+        params.append(UUID(producto_id))
+    
+    if nombre:
+        query_conditions.append("nombre = %s")
+        params.append(nombre)
+        end_conditions.append("ALLOW FILTERING")
         
-    elif nombre == '':
-        productos = OrderedDict(sorted({producto.producto_id:producto._asdict() for producto in 
-            session.execute("""
-                SELECT * FROM producto
-                where producto_id = %s
-                """, (UUID(producto_id), ))
-            }.items(), key=lambda x: x[1]['fecha'], reverse=True))
-    else:
-        productos = OrderedDict(sorted({producto.producto_id:producto._asdict() for producto in 
-            session.execute("""
-                SELECT * FROM producto
-                where producto_id = %s and nombre = %s ALLOW FILTERING
-                """, (UUID(producto_id), nombre ))
-            }.items(), key=lambda x: x[1]['fecha'], reverse=True))
-    
+    query = query + " AND ".join(query_conditions) + " " + " ".join(end_conditions)
+
+    productos = OrderedDict(sorted(
+        {producto.producto_id: producto._asdict() for producto in session.execute(query, params)}.items(),
+        key=lambda x: x[1]['fecha'],
+        reverse=True
+    ))    
     
     return render_template('index_admin.html', usuario=sessionF, productos=productos)
     
