@@ -2,8 +2,9 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recibo de Compra</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styleRecibo.css') }}">
 </head>
 <body>
@@ -19,11 +20,13 @@
                 <ul class="list-group mb-4">
                     {% for producto in recibo.productos %}
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="my-0">{{ producto.nombre }}</h6>
-                            <small class="text-muted">Cantidad: {{ producto.cantidad }}</small>
-                        </div>
-                        <span class="text-muted">${{ producto.precio }}</span>
+                        <a href="{{ url_for('producto', producto_id=producto.producto_id) }}" class="no-link-style">
+                            <div>
+                                <h6 class="my-0">{{ producto.nombre }}</h6>
+                                <small class="text-muted">Cantidad: {{ producto.cantidad }} - ${{ producto.precio }}</small>
+                            </div>
+                        </a>
+                        <span class="text-muted">${{ producto.precio*producto.cantidad }}</span>
                     </li>
                     {% endfor %}
                 </ul>
@@ -31,5 +34,7 @@
             </div>
         </div>
     </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

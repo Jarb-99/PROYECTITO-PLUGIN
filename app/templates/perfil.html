@@ -2,120 +2,106 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Perfil</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/stylePerfil.css') }}">
 </head>
 <body>
     <header class="navbar navbar-expand-lg navbar-dark bg-dark">
         {% include 'navbar.html' %}
     </header>
-        <div class="sidebar">
-            <a href="{{ url_for('PComprados') }}">Productos Comprados</a>
-            <a href="{{ url_for('LSoportes') }}">Soportes</a>
-            <a href="{{ url_for('LRecibos') }}">Recibos</a>
+    <div class="d-flex">
+        <div class="sidebar bg-dark text-light p-3">
+            <a href="{{ url_for('PComprados') }}" class="d-block text-light mb-2">Productos Comprados</a>
+            <a href="{{ url_for('LSoportes') }}" class="d-block text-light mb-2">Soportes</a>
+            <a href="{{ url_for('LRecibos') }}" class="d-block text-light">Recibos</a>
         </div>
-    <div class="content">
-        <main class="container mt-5">
-            <div class="row">
-                <div class="col-md-6 mb-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <form id="editar-perfil-form" method="POST" action="{{ url_for('editar_perfil') }}">
-                                <h5 class="card-title">Información Personal</h5>
-                                
-                                <p class="card-text">Nombre: <span id="nombre-text">{{ usuario.nombre }}</span></p>
-                                <input type="text" class="form-control mb-2" id="nombre-input" name="nombre" style="display:none;" value="{{ usuario.nombre }}">
+        <div class="content flex-grow-1">
+            <main class="container mt-5">
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <form id="editar-perfil-form" method="POST" action="{{ url_for('editar_perfil') }}">
+                                    <h5 class="card-title">Información Personal</h5>
+                                    
+                                    <p class="card-text">Nombre: <span id="nombre-text">{{ usuario.nombre }}</span></p>
+                                    <input type="text" class="form-control mb-2" id="nombre-input" name="nombre" style="display:none;" value="{{ usuario.nombre }}">
 
-                                <p class="card-text">Apellido: <span id="apellido-text">{{ usuario.apellido }}</span></p>
-                                <input type="text" class="form-control mb-2" id="apellido-input" name="apellido" style="display:none;" value="{{ usuario.apellido }}">
+                                    <p class="card-text">Apellido: <span id="apellido-text">{{ usuario.apellido }}</span></p>
+                                    <input type="text" class="form-control mb-2" id="apellido-input" name="apellido" style="display:none;" value="{{ usuario.apellido }}">
 
-                                <p class="card-text">Correo electrónico: <span id="correo-text">{{ usuario.correo }}</span></p>
-                                <input type="email" class="form-control mb-2" id="correo-input" name="correo" style="display:none;" value="{{ usuario.correo }}">
+                                    <p class="card-text">Correo electrónico: <span id="correo-text">{{ usuario.correo }}</span></p>
+                                    <input type="email" class="form-control mb-2" id="correo-input" name="correo" style="display:none;" value="{{ usuario.correo }}">
 
-                                <p class="card-text">Contraseña: <span id="contrasena-text">{{ usuario.contrasena }}</span></p>
-                                <input type="password" class="form-control mb-2" id="contrasena-input" name="contrasena" style="display:none;" value="{{ usuario.contrasena }}">
+                                    <p class="card-text">Contraseña: <span id="contrasena-text">{{ usuario.contrasena }}</span></p>
+                                    <input type="password" class="form-control mb-2" id="contrasena-input" name="contrasena" style="display:none;" value="{{ usuario.contrasena }}">
 
-                                <p class="card-text">Teléfono: <span id="telefono-text">{{ usuario.telefono }}</span></p>
-                                <input type="text" class="form-control mb-2" id="telefono-input" name="telefono" style="display:none;" value="{{ usuario.telefono }}">
+                                    <p class="card-text">Teléfono: <span id="telefono-text">{{ usuario.telefono }}</span></p>
+                                    <input type="text" class="form-control mb-2" id="telefono-input" name="telefono" style="display:none;" value="{{ usuario.telefono }}">
 
-                                <p class="card-text">Dirección: <span id="direccion-text">{{ usuario.direccion }}</span></p>
-                                <input type="text" class="form-control mb-2" id="direccion-input" name="direccion" style="display:none;" value="{{ usuario.direccion }}">
-                                
-                                <p class="card-text">Fecha de unión: {{ usuario.fecha_rgstro }}</p>
-                                <p class="card-text">Usuario id: {{ usuario.usuario_id }}</p>
-                                
-                                
-                                <a href="#" class="btn btn-primary" id="editar-btn" onclick="mostrarEdicion()">Editar Perfil</a>
-                                <button type="submit" class="btn btn-success" id="subir-btn" style="display:none;">Subir</button>
-                                <a href="#" class="btn btn-secondary" id="cancelar-btn" style="display:none;" onclick="cancelarEdicion()">Cancelar</a>
-                            </form>
+                                    <p class="card-text">Dirección: <span id="direccion-text">{{ usuario.direccion }}</span></p>
+                                    <input type="text" class="form-control mb-2" id="direccion-input" name="direccion" style="display:none;" value="{{ usuario.direccion }}">
+                                    
+                                    <p class="card-text">Fecha de unión: {{ usuario.fecha_rgstro }}</p>
+                                    <p class="card-text">Usuario id: {{ usuario.usuario_id }}</p>
+                                    
+                                    
+                                    <a href="#" class="btn btn-primary" id="editar-btn" onclick="mostrarEdicion()">Editar Perfil</a>
+                                    <button type="submit" class="btn btn-success" id="subir-btn" style="display:none;">Subir</button>
+                                    <a href="#" class="btn btn-secondary" id="cancelar-btn" style="display:none;" onclick="cancelarEdicion()">Cancelar</a>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Historial de Compras</h5>
+                                <ul class="list-group">
+                                    {% for compra in compras %}
+                                    <a href="{{ url_for('producto', producto_id=compra.producto_id) }}" class="no-link-style">    
+                                        <li class="list-group-item">
+                                            {{ compra.nombre }} - ${{ compra.precio }} (Cantidad: {{ compra.cantidad }})
+                                        </li>
+                                    </a>
+                                    {% endfor %}
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
-
-                <div class="col-md-6 mb-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">Historial de Compras</h5>
-                            <ul class="list-group">
-                                {% for compra in compras %}
-                                <a href="{{ url_for('producto', producto_id=compra.producto_id) }}" class="no-link-style">    
-                                    <li class="list-group-item">
-                                        {{ compra.nombre }} - ${{ compra.precio }} (Cantidad: {{ compra.cantidad }})
-                                    </li>
-                                </a>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
+            </main>
+            <div class="content_bottom"></div>
+        </div>
     </div>
-</body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function mostrarEdicion() {
+            const elementsToHide = ['nombre', 'apellido', 'correo', 'contrasena', 'telefono', 'direccion'];
+            elementsToHide.forEach(element => {
+                document.getElementById(`${element}-text`).style.display = 'none';
+                document.getElementById(`${element}-input`).style.display = 'block';
+            });
 
-<script>
-    function mostrarEdicion() {
-        document.getElementById('nombre-text').style.display = 'none';
-        document.getElementById('apellido-text').style.display = 'none';
-        document.getElementById('correo-text').style.display = 'none';
-        document.getElementById('contrasena-text').style.display = 'none';
-        document.getElementById('telefono-text').style.display = 'none';
-        document.getElementById('direccion-text').style.display = 'none';
-    
-        document.getElementById('nombre-input').style.display = 'block';
-        document.getElementById('apellido-input').style.display = 'block';
-        document.getElementById('correo-input').style.display = 'block';
-        document.getElementById('contrasena-input').style.display = 'block';
-        document.getElementById('telefono-input').style.display = 'block';
-        document.getElementById('direccion-input').style.display = 'block';
-    
-        document.getElementById('editar-btn').style.display = 'none';
-        document.getElementById('subir-btn').style.display = 'inline-block';
-        document.getElementById('cancelar-btn').style.display = 'inline-block';
-    }
-    
-    function cancelarEdicion() {
-        document.getElementById('nombre-text').style.display = 'inline';
-        document.getElementById('apellido-text').style.display = 'inline';
-        document.getElementById('correo-text').style.display = 'inline';
-        document.getElementById('contrasena-text').style.display = 'inline';
-        document.getElementById('telefono-text').style.display = 'inline';
-        document.getElementById('direccion-text').style.display = 'inline';
-    
-        document.getElementById('nombre-input').style.display = 'none';
-        document.getElementById('apellido-input').style.display = 'none';
-        document.getElementById('correo-input').style.display = 'none';
-        document.getElementById('contrasena-input').style.display = 'none';
-        document.getElementById('telefono-input').style.display = 'none';
-        document.getElementById('direccion-input').style.display = 'none';
-    
-        document.getElementById('editar-btn').style.display = 'inline-block';
-        document.getElementById('subir-btn').style.display = 'none';
-        document.getElementById('cancelar-btn').style.display = 'none';
-    }
+            document.getElementById('editar-btn').style.display = 'none';
+            document.getElementById('subir-btn').style.display = 'inline-block';
+            document.getElementById('cancelar-btn').style.display = 'inline-block';
+        }
+
+        function cancelarEdicion() {
+            const elementsToShow = ['nombre', 'apellido', 'correo', 'contrasena', 'telefono', 'direccion'];
+            elementsToShow.forEach(element => {
+                document.getElementById(`${element}-text`).style.display = 'inline';
+                document.getElementById(`${element}-input`).style.display = 'none';
+            });
+
+            document.getElementById('editar-btn').style.display = 'inline-block';
+            document.getElementById('subir-btn').style.display = 'none';
+            document.getElementById('cancelar-btn').style.display = 'none';
+        }
     </script>
-
+</body>
 </html>
-

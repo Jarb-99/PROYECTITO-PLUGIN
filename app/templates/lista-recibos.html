@@ -3,47 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <title>Recibos</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styleRecibos.css') }}">
 </head>
 <body>
     <header class="navbar navbar-expand-lg navbar-dark bg-dark">
         {% include 'navbar.html' %}
-        <div class="sidebar">
-            <div class="container">
-                <a href="{{ url_for('PComprados') }}">Productos Comprados</a>
-                <a href="{{ url_for('LSoportes') }}">Soportes</a>
-                <a href="{{ url_for('LRecibos') }}">Recibos</a>
-            </div>
-        </div>
     </header>
-    <div class="content">
-        <main class="container mt-5">
-            <h1>Lista de Recibos</h1>
-            {% for recibo in recibos %}
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h5 class="card-title"><strong>Id del Recibo: {{ recibo.recibo_id }}</strong></h5>
-                    <p class="card-text">Fecha: <strong>{{ recibo.fecha }}</strong></p>
-                    <p class="card-text">Método de Pago: <strong>{{ recibo.metodo.nombre }}: {{ recibo.metodo.descripcion }}</strong></p>
-                    <ul class="list-group mb-4">
-                        {% for producto in recibo.productos %}
-                        <a href="{{ url_for('producto', producto_id=producto.producto_id) }}" class="no-link-style">
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="my-0">{{ producto.nombre }}</h6>
-                                    <small class="text-muted">Cantidad: {{ producto.cantidad }}</small>
-                                </div>
-                                <span class="text-muted">${{ producto.precio }}</span>
-                            </li>
-                        </a>
-                        {% endfor %}
-                    </ul>
-                    <h3>Total: $<span>{{ recibo.monto }}</span></h3>
+    <div class="d-flex">
+        <div class="sidebar bg-dark text-light p-3">
+            <a href="{{ url_for('PComprados') }}" class="d-block text-light mb-2">Productos Comprados</a>
+            <a href="{{ url_for('LSoportes') }}" class="d-block text-light mb-2">Soportes</a>
+            <a href="{{ url_for('LRecibos') }}" class="d-block text-light">Recibos</a>
+        </div>
+        <div class="content flex-grow-1">
+            <main class="container mt-3">
+                <h1 class="text-center mb-5">Lista de Recibos</h1>
+                <div class="row" id="recibosList">
+                    {% for recibo in recibos %}
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title"><strong>Id del Recibo: {{ recibo.recibo_id }}</strong></h5>
+                                <p class="card-text">Fecha: <strong>{{ recibo.fecha }}</strong></p>
+                                <p class="card-text">Método de Pago: <strong>{{ recibo.metodo.nombre }}: {{ recibo.metodo.descripcion }}</strong></p>
+                                <ul class="list-group mb-4">
+                                    {% for producto in recibo.productos %}
+                                    <a href="{{ url_for('producto', producto_id=producto.producto_id) }}" class="no-link-style">
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="my-0">{{ producto.nombre }}</h6>
+                                                <small class="text-muted">Cantidad: {{ producto.cantidad }} - ${{ producto.precio }}</small>
+                                            </div>
+                                            <span class="text-muted">${{ producto.precio*producto.cantidad }}</span>
+                                        </li>
+                                    </a>
+                                    {% endfor %}
+                                </ul>
+                                <h3>Total: $<span>{{ recibo.monto }}</span></h3>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
                 </div>
-            </div>
-            {% endfor %}
-        </main>
+            </main>
+        </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

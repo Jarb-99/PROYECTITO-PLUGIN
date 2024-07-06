@@ -1,23 +1,30 @@
-/* styles.css */
 body {
-    font-family: 'Arial', sans-serif;
-    background-color: #c77633;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
     margin: 0;
-    padding: 0;
+    font-family: 'Arial', sans-serif;
+    background-image: linear-gradient(92deg, #f83600 0%, #f9d423 100%);
 }
 
+header.bg-dark,
 header.navbar {
-    background-color: #343a40;
+    width: 100%;
+    z-index: 1;
+    border-bottom: 1px solid #ddd;
+    background: linear-gradient(135deg, #000001, #0D101F);
 }
 
 header.navbar .nav-link {
-    color: #fff !important;
+    color: #fff;
     padding: 10px 15px;
-    transition: background-color 0.3s;
+    transition: background-color 0.5s;
+    border-radius: 5px;
 }
 
 header.navbar .nav-link:hover {
-    background-color: #495057;
+    background-color: #f88400;
+    color: #0D101F;
     border-radius: 5px;
 }
 
@@ -27,33 +34,28 @@ header .container {
     align-items: center;
 }
 
-.main-header {
-    text-align: center;
-    padding: 20px 0;
-    color: #343a40;
-    background-color: #e9ecef;
-    border-radius: 10px;
-    margin-bottom: 30px;
+main.container {
+    margin-top: 20px;
+}
+
+main h1.main-header {
+    color: #ffffff;
 }
 
 .card {
     border: none;
     border-radius: 10px;
-    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     transition: transform 0.3s, box-shadow 0.3s;
 }
 
 .card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-.card-img-top {
-    border-bottom: 1px solid #ddd;
+    box-shadow: 0 4px 10px #ffffff;
 }
 
 .card-title {
-    color: #343a40;
+    color: #1e293b;
     font-weight: bold;
 }
 
@@ -61,44 +63,15 @@ header .container {
     color: #6c757d;
 }
 
-.card .btn {
-    transition: background-color 0.3s, color 0.3s;
-}
-
-.card .btn:hover {
-    background-color: #343a40;
-    color: #fff;
-}
-
-.btn-primary {
-    background-color: #007bff;
-    border-color: #007bff;
-}
-
-.btn-primary:hover {
-    background-color: #0056b3;
-    border-color: #0056b3;
-}
-
 .checked {
     color: orange;
 }
 
-.card-body .star-rating .fa {
-    margin-right: 5px;
+.stars .fa {
+    margin-right: 2px;
 }
 
-.card-body .compras {
+.compras {
+    margin-top: 5px;
     color: #6c757d;
-    font-size: 0.9rem;
-}
-
-.card-body .valoracion {
-    display: flex;
-    align-items: center;
-}
-
-.card-body .valoracion .stars {
-    display: inline-block;
-    margin-right: 10px;
 }

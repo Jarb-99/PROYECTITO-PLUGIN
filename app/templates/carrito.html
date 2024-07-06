@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carrito</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/stylesCarrito.css') }}">
 </head>
 <body>
@@ -13,7 +13,7 @@
     </header>
 
     <div class="container mt-4">
-        <h1>Carrito de Compras</h1>
+        <h1 class="text-center mb-4">Carrito de Compras</h1>
         <div class="row">
             <div class="col-md-8">
                 <section id="carrito">
@@ -22,7 +22,7 @@
                             {% for producto in carrito.productos %}
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     <div>
-                                        <h5>{{ producto.nombre }}</h5>
+                                        <h5><a href="{{ url_for('producto', producto_id=producto.producto_id) }}" class="no-link-style">{{ producto.nombre }}</a></h5>
                                         <p>Precio: ${{ producto.precio }}</p>
                                         <p>Cantidad: {{ producto.cantidad }}</p>
                                         <p>Monto: ${{ producto.monto }}</p>
@@ -59,20 +59,20 @@
                 </section>
             </div>
             <div class="col-md-4">
-                <div class="total-container">
+                <div class="card total-container">
                     <h3>Total: $<span id="totalCarrito">{{ carrito.monto }}</span></h3>
                     {% if carrito.productos %}
                         <form action="{{ url_for('pagar_carrito') }}" method="POST">
-                            <div class="form-group">
-                                <label for="metodoPago">Método de Pago:</label>
-                                <select id="metodoPago" name="metodoPago" class="form-control" onchange="toggleCorreoInput()">
+                            <div class="mb-3">
+                                <label for="metodoPago" class="form-label">Método de Pago:</label>
+                                <select id="metodoPago" name="metodoPago" class="form-select" onchange="toggleCorreoInput()">
                                     <option value="">Selecciona un método de pago</option>
                                     <option value="tarjeta">Tarjeta</option>
                                     <option value="paypal">Paypal</option>
                                 </select>
                             </div>
-                            <div class="form-group" id="correoInput" style="display: none;">
-                                <label for="correo">Correo:</label>
+                            <div class="mb-3" id="correoInput" style="display: none;">
+                                <label for="correo" class="form-label">Correo:</label>
                                 <input type="email" id="correo" name="correo" class="form-control" required>
                             </div>
                             <button type="submit" id="pagarBtn" class="btn btn-success">Pagar</button>
@@ -85,6 +85,7 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function toggleCorreoInput() {
             var metodoPago = document.getElementById("metodoPago").value;

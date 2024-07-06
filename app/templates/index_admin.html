@@ -2,14 +2,11 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styleIndexAdmin.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <!-- Importar scipts Modal bootstrap para agregar un producto -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </head>
 <body>
     <header class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -17,131 +14,112 @@
     </header>
 
     <main class="container mt-5">
-        <h1 class="main-header">Editor de productos</h1>
+        <h1 class="main-header mb-4 text-center">Editor de productos</h1>
         
-        <div class="form-inline">
-            <form class="form-inline" method="POST" action="{{ url_for('buscar_producto_admin') }}">
-                <input class="form-control mr-sm-2" type="search" name="buscar" placeholder="Buscar productos" aria-label="Buscar">
-                <button class="btn btn-success mr-sm-2" type="submit">Buscar</button>
+        <div class="d-flex mb-4">
+            <form class="d-flex" method="POST" action="{{ url_for('buscar_producto_admin') }}">
+                <input class="form-control me-2" type="search" name="nombre" placeholder="Buscar por nombre" aria-label="Buscar">
+                <input class="form-control me-2" type="search" name="producto_id" placeholder="Buscar por id" aria-label="Buscar" pattern="[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}">
+                <button class="btn btn-success me-2" type="submit">Buscar</button>
             </form>
-
-            <button class="form-inline btn btn-warning" type="button" data-toggle="modal" data-target="#agregarModal">Agregar</button>   
+            <button class="btn btn-warning" type="button" data-bs-toggle="modal" data-bs-target="#agregarModal">Agregar</button>   
         </div>
 
         <div class="row">
             {% for producto_id, producto in productos.items() %}
-            <div class="col-md-4">
-                <div class="product-card">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body d-flex flex-column">
+                        <form method="POST" action="{{ url_for('editar_producto_admin') }}">
+                            <h5 class="text-center "><strong>ID: {{ producto['producto_id'] }}</strong></h5>
+                            <h5><strong>Nombre: <span id="nombre-text-{{ producto_id }}">{{ producto['nombre'] }}</span></strong></h5>
+                            <input type="text" class="form-control mb-2" id="nombre-input-{{ producto_id }}" name="nombre" style="display:none;" value="{{ producto['nombre'] }}">
 
-                    <form method="POST" action="{{ url_for('editar_producto_admin') }}">
+                            <p><strong>Descripción:</strong> <span id="descripcion-text-{{ producto_id }}">{{ producto['descripcion'] }}</span></p>
+                            <textarea class="form-control mb-2" id="descripcion-input-{{ producto_id }}" name="descripcion" style="display:none;">{{ producto['descripcion'] }}</textarea>
 
-                        <h5><strong>Nombre: <span id="nombre-text-{{ producto_id }}">{{ producto['nombre'] }}</strong></span></h5>
-                        <input type="text" class="form-control mb-2" id="nombre-input-{{ producto_id }}" name="nombre" style="display:none;" value="{{ producto['nombre'] }}">
+                            <p><strong>Precio:</strong> <span id="precio-text-{{ producto_id }}">{{ producto['precio'] }}</span></p>
+                            <input type="number" class="form-control mb-2" id="precio-input-{{ producto_id }}" name="precio" style="display:none;" value="{{ producto['precio'] }}">
 
-                        <p><strong>Descripción:</strong> <span id="descripcion-text-{{ producto_id }}">{{ producto['descripcion'] }}</span></p>
-                        <textarea class="form-control mb-2" id="descripcion-input-{{ producto_id }}" name="descripcion" style="display:none;">{{ producto['descripcion'] }}</textarea>
+                            <p><strong>Fecha:</strong> {{ producto['fecha'] }}</p>
+                            <input type="hidden" name="fecha" value="{{ producto.fecha }}">
 
-                        <p><strong>Precio:</strong> <span id="precio-text-{{ producto_id }}">{{ producto['precio'] }}</span></p>
-                        <input type="number" class="form-control mb-2" id="precio-input-{{ producto_id }}" name="precio" style="display:none;" value="{{ producto['precio'] }}">
+                            <p><strong>Valoración:</strong> {{ producto['valoracion'] }}</p>
+                            <p><strong>Compras:</strong> {{ producto['compras'] }}</p>
 
-                        <p><strong>Fecha:</strong> {{ producto['fecha'] }}</p>
-                        <input type="hidden" name="fecha" value="{{ producto.fecha }}">
+                            <input type="hidden" name="producto_id" value="{{ producto_id }}">
 
-                        <p><strong>Valoración:</strong> {{ producto['valoracion'] }}</p>
-                        <p><strong>Compras:</strong> {{ producto['compras'] }}</p>
+                            <p><strong>Versión Compatible:</strong> <span id="version-text-{{ producto_id }}">{{ producto['version_comptble'] }}</span></p>
+                            <input type="text" class="form-control mb-2" id="version-input-{{ producto_id }}" name="version_comptble" style="display:none;" value="{{ producto['version_comptble'] }}">
 
-                        <input type="hidden" name="producto_id" value="{{ producto_id }}">
+                            {% if producto.plugins %}
+                                <p class="card-text"><strong>Plugins:</strong>
+                                    <ul>
+                                        {% for plugin in producto.plugins %}
+                                            <li>Versión: {{ plugin.version }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </p>
+                            {% endif %}
+                            {% if producto.schematics %}
+                                <p class="card-text"><strong>Schematics:</strong>
+                                    <ul>
+                                        {% for schematic in producto.schematics %}
+                                            <li>Dimensiones: {{ schematic.dimensiones }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </p>
+                            {% endif %}
 
-                        <p><strong>Versión Compatible:</strong> <span id="version-text-{{ producto_id }}">{{ producto['version_comptble'] }}</span></p>
-                        <input type="text" class="form-control mb-2" id="version-input-{{ producto_id }}" name="version_comptble" style="display:none;" value="{{ producto['version_comptble'] }}">
-
-                        {% if producto.plugins %}
-                            <p class="card-text"><strong>Plugins:</strong>
-                                <ul>
-                                    {% for plugin in producto.plugins %}
-                                        <li>Versión: {{ plugin.version }}</li>
-                                    {% endfor %}
-                                </ul>
-                            </p>
-                        {% endif %}
-                        {% if producto.schematics %}
-                            <p class="card-text"><strong>Schematics:</strong>
-                                <ul>
-                                    {% for schematic in producto.schematics %}
-                                        <li>Dimensiones: {{ schematic.dimensiones }}</li>
-                                    {% endfor %}
-                                </ul>
-                            </p>
-                        {% endif %}
-
-                        <button type="button" class="btn btn-primary btn-sm" id="editar-btn-{{ producto_id }}" onclick="mostrarEdicion('{{ producto_id }}')">Editar</button>
-                        
-                        
-                        <button type="submit" class="btn btn-success btn-sm" name="accion" value="confirmar_{{ producto_id }}" id="subir-btn-{{ producto_id }}" style="display:none;">Confirmar</button>
-                        <button type="button" class="btn btn-secondary btn-sm" id="cancelar-btn-{{ producto_id }}" style="display:none;" onclick="cancelarEdicion('{{ producto_id }}')">Cancelar</button>
-                        
-                        
-                        <button type="submit" class="btn btn-danger btn-sm" name="accion" value="eliminar_{{ producto_id }}" id="eliminar-btn-{{ producto_id }}">Eliminar</button>
-
-
-                    </form>
+                            <div class="mt-auto">
+                                <button type="button" class="btn btn-primary btn-sm" id="editar-btn-{{ producto_id }}" onclick="mostrarEdicion('{{ producto_id }}')">Editar</button>
+                                <button type="submit" class="btn btn-success btn-sm" name="accion" value="confirmar_{{ producto_id }}" id="subir-btn-{{ producto_id }}" style="display:none;">Confirmar</button>
+                                <button type="button" class="btn btn-secondary btn-sm" id="cancelar-btn-{{ producto_id }}" style="display:none;" onclick="cancelarEdicion('{{ producto_id }}')">Cancelar</button>
+                                <button type="submit" class="btn btn-danger" name="accion" value="eliminar_{{ producto_id }}" id="eliminar-btn-{{ producto_id }}">Borrar</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
             {% endfor %}
         </div>
 
-
-
-        <!-- Modal bootstrap para agregar un  producto -->
-        <div class="modal fade" id="agregarModal" tabindex="-1" role="dialog" aria-labelledby="agregarModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
+        <!-- Modal bootstrap para agregar un producto -->
+        <div class="modal fade" id="agregarModal" tabindex="-1" aria-labelledby="agregarModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="agregarModalLabel">Agregar Producto</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <form method="POST" action="{{ url_for('agregar_producto_admin') }}">
-
-                            <div class="form-group">
-                                <label for="nombre">Nombre</label>
+                            <div class="mb-3">
+                                <label for="nombre" class="form-label">Nombre</label>
                                 <input type="text" class="form-control" id="nombre" name="nombre" required>
                             </div>
-
-                            <div class="form-group">
-                                <label for="descripcion">Descripción</label>
+                            <div class="mb-3">
+                                <label for="descripcion" class="form-label">Descripción</label>
                                 <textarea class="form-control" id="descripcion" name="descripcion" required></textarea>
                             </div>
-
-                            <div class="form-group">
-                                <label for="precio">Precio</label>
+                            <div class="mb-3">
+                                <label for="precio" class="form-label">Precio</label>
                                 <input type="number" class="form-control" id="precio" name="precio" step="0.01" required>
                             </div>
-
-                            <div class="form-group">
-                                <label for="version_comptble">Versión Compatible</label>
+                            <div class="mb-3">
+                                <label for="version_comptble" class="form-label">Versión Compatible</label>
                                 <input type="text" class="form-control" id="version_comptble" name="version_comptble" required>
                             </div>
-
-                            <div class="form-group">
-                                <label for="plugins">Plugins</label>
-                                <div id="plugins-list">
-
-                                </div>
-                                <button class="btn btn-primary" type="button" onclick="addPluginField()">Agregar Plugin</button>
+                            <div class="mb-3">
+                                <label for="plugins" class="form-label">Plugins</label>
+                                <div id="plugins-list"></div>
+                                <button class="btn btn-primary mt-2" type="button" onclick="addPluginField()">Agregar Plugin</button>
                             </div>
-
-                            <div class="form-group">
-                                <label for="schematics">Schematics</label>
-                                <div id="schematics-list">
-
-                                </div>
-                                <button class="btn btn-primary" type="button" onclick="addSchematicField()">Agregar Schematic</button>
+                            <div class="mb-3">
+                                <label for="schematics" class="form-label">Schematics</label>
+                                <div id="schematics-list"></div>
+                                <button class="btn btn-primary mt-2" type="button" onclick="addSchematicField()">Agregar Schematic</button>
                             </div>
-
-
                             <button type="submit" class="btn btn-success">Guardar</button>
                         </form>
                     </div>
@@ -151,6 +129,7 @@
 
     </main>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
     function mostrarEdicion(productId) {
         document.getElementById('nombre-text-' + productId).style.display = 'none';
@@ -194,9 +173,7 @@
         const pluginField = `
             <div class="input-group mb-2">
                 <input type="text" class="form-control" name="plugins[]" placeholder="Versión del Plugin">
-                <div class="input-group-append">
-                    <button class="btn btn-danger" type="button" onclick="removeField(this)">Eliminar</button>
-                </div>
+                <button class="btn btn-danger" type="button" onclick="removeField(this)">Eliminar</button>
             </div>`;
         document.getElementById('plugins-list').insertAdjacentHTML('beforeend', pluginField);
     }
@@ -205,9 +182,7 @@
         const schematicField = `
             <div class="input-group mb-2">
                 <input type="number" class="form-control" name="schematics[]" placeholder="Dimensiones del Schematic">
-                <div class="input-group-append">
-                    <button class="btn btn-danger" type="button" onclick="removeField(this)">Eliminar</button>
-                </div>
+                <button class="btn btn-danger" type="button" onclick="removeField(this)">Eliminar</button>
             </div>`;
         document.getElementById('schematics-list').insertAdjacentHTML('beforeend', schematicField);
     }

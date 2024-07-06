@@ -1,53 +1,69 @@
 body {
     display: flex;
-    min-height: 100vh;
     flex-direction: column;
+    min-height: 100vh;
     margin: 0;
     font-family: 'Arial', sans-serif;
-    background-color: #f8f9fa; /* Color de fondo general */
+    background-image: linear-gradient(92deg, #f83600 0%, #f9d423 100%);
+}
+
+header.bg-dark,
+header.navbar {
+    width: 100%;
+    z-index: 1;
+    border-bottom: 1px solid #ddd;
+    background: linear-gradient(135deg, #000001, #0D101F);
+}
+
+header.navbar .nav-link {
+    color: #fff;
+    padding: 10px 15px;
+    transition: background-color 0.5s;
+    border-radius: 5px;
+}
+
+header.navbar .nav-link:hover {
+    background-color: #f88400;
+    color: #0D101F;
+    border-radius: 5px;
+}
+
+.d-flex {
+    display: flex;
 }
 
 .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100%;
     width: 200px;
-    background-color: #343a40; /* Color de fondo de la barra lateral */
-    padding-top: 60px; /* Ajuste para superponerse al encabezado */
+    background: #0D101F;
+    border-right: 1px solid #ddd;
     transition: all 0.3s;
+    padding: 15px;
 }
 
 .sidebar a {
-    padding: 15px 20px;
-    text-align: left;
-    text-decoration: none;
-    font-size: 16px;
-    color: white; /* Color del texto en los enlaces de la barra lateral */
     display: block;
-    transition: background-color 0.3s, color 0.3s;
+    color: #fff;
+    text-decoration: none;
+    padding: 10px;
+    transition: background-color 0.3s;
 }
 
 .sidebar a:hover {
-    background-color: #495057; /* Color de fondo al pasar el ratón */
-    color: #fff; /* Color del texto al pasar el ratón */
-    border-radius: 0 10px 10px 0;
+    background-color: #f88400;
+    border-radius: 5px;
+}
+
+main h1{
+    color: #fff;
 }
 
 .content {
-    margin-left: 200px; /* Ancho de la barra lateral */
+    flex-grow: 1;
     padding: 20px;
-    width: calc(100% - 200px); /* Ajuste para el contenido principal */
 }
 
-header.bg-dark {
-    position: fixed;
-    width: 100%;
-    z-index: 1;
-}
-
-main.container {
-    margin-top: 80px; /* Ajuste para superponerse al encabezado */
+.content_bottom {
+    padding-bottom: calc(100% - 750px);
 }
 
 .card {
@@ -55,32 +71,20 @@ main.container {
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     transition: transform 0.3s, box-shadow 0.3s;
-    background-color: #c77633; /* Color de fondo verde para las tarjetas */
 }
 
 .card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 10px #ffffff;
 }
 
 .card-title {
-    color: #343a40; /* Color del título de la tarjeta */
+    color: #1e293b;
     font-weight: bold;
 }
 
 .card-text {
-    color: #e9ecef; /* Color del texto de la tarjeta */
-}
-
-.btn-primary {
-    background-color: #007bff; /* Color de fondo del botón primario */
-    border-color: #007bff;
-    transition: background-color 0.3s, color 0.3s;
-}
-
-.btn-primary:hover {
-    background-color: #0056b3; /* Color de fondo del botón primario al pasar el ratón */
-    color: #fff; /* Color del texto del botón primario al pasar el ratón */
+    color: #6c757d;
 }
 
 .list-group-item {
@@ -90,45 +94,16 @@ main.container {
     border-radius: 5px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     transition: background-color 0.3s, transform 0.3s;
+    background: linear-gradient(135deg, #e0f7fa, #eefbfc);
 }
 
 .list-group-item:hover {
-    background-color: #f1f1f1; /* Color de fondo al pasar el ratón */
     transform: translateY(-2px);
 }
 
-header.navbar {
-    background-color: #343a40;
-    border-bottom: 1px solid #ddd;
-}
 
-header.navbar .nav-link {
-    color: #fff !important;
-    padding: 10px 15px;
-    transition: background-color 0.3s;
-}
 
-header.navbar .nav-link:hover {
-    background-color: #495057;
-    border-radius: 5px;
-}
-
-header .container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.card h6 {
-    margin-top: 20px;
-    font-weight: bold;
-    color: #343a40;
-}
-
-ul.list-group {
-    margin-top: 10px;
-}
-
-ul.list-group li {
-    background-color: #fff; /* Color de fondo de los elementos de la lista */
+.btn-link:hover {
+    color: #f88400;
+    text-decoration: underline;
 }

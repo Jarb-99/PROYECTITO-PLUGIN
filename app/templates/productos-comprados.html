@@ -3,38 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <title>Productos Comprados</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styleProductos.css') }}">
 </head>
 <body>
     <header class="navbar navbar-expand-lg navbar-dark bg-dark">
         {% include 'navbar.html' %}
     </header>
-    <div class="sidebar">
-        <a href="{{ url_for('PComprados') }}">Productos Comprados</a>
-        <a href="{{ url_for('LSoportes') }}">Soportes</a>
-        <a href="{{ url_for('LRecibos') }}">Recibos</a>
-    </div>
-    <main class="content">
-        <div class="container mt-5">
-            <h2 class="mb-4">Productos Comprados</h2>
-            <div class="row">
-                {% for compra in compras %}
-                <div class="col-md-4">
-                    <div class="card mb-4">
-                        <a href="{{ url_for('producto', producto_id=compra.producto_id) }}" class="no-link-style">
-                            <div class="card-body">
-                                <h5 class="card-title">{{ compra.nombre }}</h5>
-                                <p class="card-text">Precio: ${{ compra.precio }}</p>
-                                <p class="card-text">Cantidad: {{ compra.cantidad }}</p>
-                                <p class="card-text"><small class="text-muted">Fecha de compra: {{ compra.fecha }}</small></p>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
+    <div class="d-flex">
+        <div class="sidebar bg-dark text-light p-3">
+            <a href="{{ url_for('PComprados') }}" class="d-block text-light mb-2">Productos Comprados</a>
+            <a href="{{ url_for('LSoportes') }}" class="d-block text-light mb-2">Soportes</a>
+            <a href="{{ url_for('LRecibos') }}" class="d-block text-light">Recibos</a>
         </div>
-    </main>
+        <div class="content flex-grow-1">
+            <main class="container mt-3">
+                <h1 class="mb-5 text-center" >Productos Comprados</h2>
+                <div class="row">
+                    {% for compra in compras %}
+                    <div class="col-md-4">
+                        <div class="card mb-4 ">
+                            <a href="{{ url_for('producto', producto_id=compra.producto_id) }}" class="no-link-style">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ compra.nombre }}</h5>
+                                    <p class="card-text">Precio: ${{ compra.precio }}</p>
+                                    <p class="card-text">Cantidad: {{ compra.cantidad }}</p>
+                                    <p class="card-text"><small class="text-muted">Fecha de compra: {{ compra.fecha }}</small></p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </main>
+            <div class="content_bottom"></div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -2,37 +2,38 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Perfil</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/stylePerfil.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/stylePerfilAdmin.css') }}">
 </head>
 <body>
     <header class="navbar navbar-expand-lg navbar-dark bg-dark">
         {% include 'navbar_admin.html' %}
     </header>
-    <main class="container mt-5">
+    <main class="container mt-2">
         <div class="col-md-6 mx-auto">
-            <div class="card mt-5">
+            <div class="card mt-5 mb-5">
                 <div class="card-body">
                     <form id="editar-perfil-form" method="POST" action="{{ url_for('editar_perfil_admin') }}">
-                        <h5 class="card-title">Información Personal</h5>
+                        <h5 class="card-title text-center">Información Personal</h5>
 
-                        <p class="card-text"><strong>Nombre:</strong> <span id="nombre-text">{{ usuario.nombre }}</span></p>
+                        <p><strong>Nombre:</strong> <span class="card-text" id="nombre-text">{{ usuario.nombre }}</span></p>
                         <input type="text" class="form-control mb-2" id="nombre-input" name="nombre" style="display:none;" value="{{ usuario.nombre }}">
 
-                        <p class="card-text"><strong>Apellido:</strong> <span id="apellido-text">{{ usuario.apellido }}</span></p>
+                        <p><strong>Apellido:</strong> <span class="card-text" id="apellido-text">{{ usuario.apellido }}</span></p>
                         <input type="text" class="form-control mb-2" id="apellido-input" name="apellido" style="display:none;" value="{{ usuario.apellido }}">
 
-                        <p class="card-text"><strong>Correo electrónico:</strong> <span id="correo-text">{{ usuario.correo }}</span></p>
+                        <p><strong>Correo electrónico:</strong> <span class="card-text" id="correo-text">{{ usuario.correo }}</span></p>
                         <input type="email" class="form-control mb-2" id="correo-input" name="correo" style="display:none;" value="{{ usuario.correo }}">
 
-                        <p class="card-text"><strong>Contraseña:</strong> <span id="contrasena-text">{{ usuario.contrasena }}</span></p>
+                        <p><strong>Contraseña:</strong> <span class="card-text" id="contrasena-text">{{ usuario.contrasena }}</span></p>
                         <input type="password" class="form-control mb-2" id="contrasena-input" name="contrasena" style="display:none;" value="{{ usuario.contrasena }}">
 
-                        <p class="card-text"><strong>Teléfono:</strong> <span id="telefono-text">{{ usuario.telefono }}</span></p>
+                        <p><strong>Teléfono:</strong> <span class="card-text" id="telefono-text">{{ usuario.telefono }}</span></p>
                         <input type="text" class="form-control mb-2" id="telefono-input" name="telefono" style="display:none;" value="{{ usuario.telefono }}">
 
-                        <p class="card-text"><strong>Dirección:</strong> <span id="direccion-text">{{ usuario.direccion }}</span></p>
+                        <p><strong>Dirección:</strong> <span class="card-text" id="direccion-text">{{ usuario.direccion }}</span></p>
                         <input type="text" class="form-control mb-2" id="direccion-input" name="direccion" style="display:none;" value="{{ usuario.direccion }}">
 
                         <p class="card-text"><strong>Fecha de unión:</strong> {{ usuario.fecha_rgstro }}</p>
@@ -47,6 +48,7 @@
         </div>
     </main>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function mostrarEdicion() {
             const elementsToHide = ['nombre', 'apellido', 'correo', 'contrasena', 'telefono', 'direccion'];

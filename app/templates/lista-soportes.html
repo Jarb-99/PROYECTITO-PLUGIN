@@ -3,58 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <title>Lista de Soportes</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styleSoportes.css') }}">
 </head>
 <body>
     <header class="navbar navbar-expand-lg navbar-dark bg-dark">
         {% include 'navbar.html' %}
     </header>
-    <div class="sidebar">
-        <a href="{{ url_for('PComprados') }}">Productos Comprados</a>
-        <a href="{{ url_for('LSoportes') }}">Soportes</a>
-        <a href="{{ url_for('LRecibos') }}">Recibos</a>
-    </div>
-    <div class="content">
-        <main class="container mt-5">
-            <h1>Lista de Soportes</h1>
-            <div class="list-group mt-4" id="soportesList">
-                {% if soportes %}
-                    {% for soporte in soportes %}
-                        <div class="card mb-4">
-                            <div class="card-body">
-                                <h5 class="card-title">Soporte ID: {{ soporte.soporte_id }}</h5>
-                                <p class="card-text">Fecha: {{ soporte.fecha }}</p>
-                                <p class="card-text">Mensaje: {{ soporte.mensaje }}</p>
-                                <h6>Respuestas:</h6>
-                                <ul class="list-group">
-                                    {% if soporte.respuestas %}
-                                        {% for timestamp, respuesta in soporte.respuestas.items() %}
-                                        <li class="list-group-item">
-                                            <strong>{{ respuesta.nombre_creador }}:</strong> {{ respuesta.mensaje }}
-                                            <br><small>{{ timestamp }}</small>
-                                        </li>
-                                        {% endfor %}
-                                    {% endif %}
-                                    <button class="btn btn-link p-0" onclick="mostrarFormularioRespuesta('{{ soporte.soporte_id }}')">Responder</button>
-                                    <form id="form-respuesta-{{ soporte.soporte_id }}" class="mt-2" style="display: none;" method="POST" action="{{ url_for('responder_soporte') }}">
-                                        <div class="form-group">
-                                            <textarea class="form-control" name="respuesta" rows="2" placeholder="Escribe tu respuesta..."></textarea>
-                                        </div>
-                                        <input type="hidden" name="soporte_id" value="{{ soporte.soporte_id }}">
-                                        <input type="hidden" name="fecha" value="{{ soporte.fecha }}">
-                                        <button type="submit" class="btn btn-success">Enviar</button>
-                                        <button type="button" class="btn btn-secondary" onclick="ocultarFormularioRespuesta('{{ soporte.soporte_id }}')">Cancelar</button>
-                                    </form>
-                                </ul>
+    <div class="d-flex">
+        <div class="sidebar bg-dark text-light p-3">
+            <a href="{{ url_for('PComprados') }}" class="d-block text-light mb-2">Productos Comprados</a>
+            <a href="{{ url_for('LSoportes') }}" class="d-block text-light mb-2">Soportes</a>
+            <a href="{{ url_for('LRecibos') }}" class="d-block text-light">Recibos</a>
+        </div>
+        <div class="content flex-grow-1">
+            <main class="container mt-3">
+                <h1 class="mb-5 text-center">Lista de Soportes</h1>
+                <div class="row" id="soportesList">
+                    {% if soportes %}
+                        {% for soporte in soportes %}
+                            <div class="col-md-6 col-lg-4 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-body d-flex flex-column">
+                                        <h5 class="card-title">Soporte ID: {{ soporte.soporte_id }}</h5>
+                                        <p class="card-text">Fecha: {{ soporte.fecha }}</p>
+                                        <p class="card-text">Mensaje:</p>
+                                        <p class="card-text text-center">{{ soporte.mensaje }} </p>
+                                        <h6>Respuestas:</h6>
+                                        <ul class="list-group flex-grow-1">
+                                            {% if soporte.respuestas %}
+                                                {% for timestamp, respuesta in soporte.respuestas.items() %}
+                                                <li class="list-group-item">
+                                                    <strong>{{ respuesta.nombre_creador }}:</strong> {{ respuesta.mensaje }}
+                                                    <br><small>{{ timestamp }}</small>
+                                                </li>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </ul>
+                                        <button class="btn btn-link p-0 mt-2" onclick="mostrarFormularioRespuesta('{{ soporte.soporte_id }}')">Responder</button>
+                                        <form id="form-respuesta-{{ soporte.soporte_id }}" class="mt-2" style="display: none;" method="POST" action="{{ url_for('responder_soporte') }}">
+                                            <div class="form-group">
+                                                <textarea class="form-control" name="respuesta" rows="2" placeholder="Escribe tu respuesta..."></textarea>
+                                            </div>
+                                            <input type="hidden" name="soporte_id" value="{{ soporte.soporte_id }}">
+                                            <input type="hidden" name="fecha" value="{{ soporte.fecha }}">
+                                            <button type="submit" class="btn btn-success">Enviar</button>
+                                            <button type="button" class="btn btn-secondary" onclick="ocultarFormularioRespuesta('{{ soporte.soporte_id }}')">Cancelar</button>
+                                        </form>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            </div>
-        </main>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                <div class="content_bottom"></div>
+            </main>
+        </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function mostrarFormularioRespuesta(soporteId) {
             var formId = 'form-respuesta-' + soporteId;
@@ -66,6 +73,5 @@
             document.getElementById(formId).style.display = 'none';
         }
     </script>
-
 </body>
 </html>

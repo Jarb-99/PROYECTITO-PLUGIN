@@ -7,7 +7,6 @@ from ScriptsCQL import createTables, deleteTables, insert
 from uuid import uuid4, UUID
 from datetime import datetime, date
 from UDTs import *
-import json
 from collections import OrderedDict
 
 app = Flask(__name__)
@@ -714,27 +713,50 @@ def index_admin():
 @app.route('/index/admin/s', methods=['GET','POST'])
 def buscar_producto_admin():
     # para buscar productos por su nombre
+    sessionF['sp_producto_id'] = None
+    sessionF['sp_nombre'] = None
+    
     if request.method == 'POST':
-        buscar = request.form['buscar'].lower()
+        nombre = request.form['nombre']
+        producto_id = request.form['producto_id']
         
-        # evitar busqueda vacia
-        if buscar == '':
-            return redirect(url_for('index_admin'))
-        
+        sessionF['sp_nombre'] = nombre
+        sessionF['sp_producto_id'] = producto_id
+    
+    nombre = sessionF['sp_nombre']
+    producto_id = sessionF['sp_producto_id']
+    productos = None
+    
+    # evitar busqueda vacia
+    if not nombre  and not producto_id:
+        return redirect(url_for('index_admin'))
+    
+    elif producto_id == '':
         productos = OrderedDict(sorted({producto.producto_id:producto._asdict() for producto in 
             session.execute("""
                 SELECT * FROM producto
-                """)
+                where nombre = %s ALLOW FILTERING
+                """, (nombre, ))
             }.items(), key=lambda x: x[1]['fecha'], reverse=True))
         
-        # para encontrar los productos por su nombre en forma de diccionario 
-        lista_productos_buscados = {producto_id:producto 
-                                    for producto_id,producto in productos.items() 
-                                    if buscar == producto['nombre'].lower()}
-        
-        return render_template('index_admin.html', usuario=sessionF, productos=lista_productos_buscados)
+    elif nombre == '':
+        productos = OrderedDict(sorted({producto.producto_id:producto._asdict() for producto in 
+            session.execute("""
+                SELECT * FROM producto
+                where producto_id = %s
+                """, (UUID(producto_id), ))
+            }.items(), key=lambda x: x[1]['fecha'], reverse=True))
+    else:
+        productos = OrderedDict(sorted({producto.producto_id:producto._asdict() for producto in 
+            session.execute("""
+                SELECT * FROM producto
+                where producto_id = %s and nombre = %s ALLOW FILTERING
+                """, (UUID(producto_id), nombre ))
+            }.items(), key=lambda x: x[1]['fecha'], reverse=True))
     
-    return redirect(url_for('index_admin'))
+    
+    return render_template('index_admin.html', usuario=sessionF, productos=productos)
+    
 
 @app.route('/index/admin/add', methods=['POST'])
 def agregar_producto_admin():
@@ -784,6 +806,7 @@ def agregar_producto_admin():
 @app.route('/index/admin/edit', methods=['POST'])
 def editar_producto_admin():
     # para editar o eliminar un producto 
+    
     if request.method == 'POST':
         accion = request.form.get('accion')
         producto_id = None
@@ -808,11 +831,12 @@ def editar_producto_admin():
 				SET nombre=%s, descripcion=%s, precio=%s, version_comptble=%s 
 				WHERE producto_id = %s AND fecha = %s 
 			""", (nombre, descripcion, precio, version_comptble, producto_id, fecha))
-        
-            lista_productos[producto_id]['nombre'] = nombre
-            lista_productos[producto_id]['descripcion'] = descripcion
-            lista_productos[producto_id]['precio'] = precio
-            lista_productos[producto_id]['version_comptble'] = version_comptble
+
+            if producto_id in lista_productos:
+                lista_productos[producto_id]['nombre'] = nombre
+                lista_productos[producto_id]['descripcion'] = descripcion
+                lista_productos[producto_id]['precio'] = precio
+                lista_productos[producto_id]['version_comptble'] = version_comptble
         
         # si se elimina el producto
         elif 'eliminar' in accion:   
@@ -857,7 +881,7 @@ def editar_producto_admin():
         
         
         
-    return redirect(url_for('index_admin'))
+    return redirect(url_for('buscar_producto_admin'))
 
 @app.route('/Perfil/admin')
 def perfil_admin():
@@ -956,57 +980,85 @@ def eliminar_soporte_admin():
 
 @app.route('/LSoportes/admin/s', methods=['GET','POST'])
 def buscar_soporte_admin():
-    usuario_id = ''
-    soporte_id = ''
-    
+    if not 'ss_usuario_id' in sessionF: 
+        sessionF['ss_usuario_id'] = None
+        sessionF['ss_soporte_id'] = None
+        sessionF['ss_fecha1'] = None
+        sessionF['ss_fecha2'] = None
+        sessionF['ss_fecha_condicion'] = "<="
+
     # para buscar un soporte por su id o/y por el id el usuario
     if request.method == 'POST':
         usuario_id = request.form['usuario_id']
         soporte_id = request.form['soporte_id']
+        fecha1 = request.form['fecha1']
+        fecha2 = request.form['fecha2']
+        fecha_condicion = "<="
         
         lista_soportes_buscados = {}
-        sessionF['s_usuario_id'] = usuario_id
-        sessionF['s_soporte_id'] = soporte_id
+        sessionF['ss_usuario_id'] = usuario_id
+        sessionF['ss_soporte_id'] = soporte_id
+        sessionF['ss_fecha1'] = fecha1
+        sessionF['ss_fecha2'] = fecha2
+        sessionF['ss_fecha_condicion'] = fecha_condicion
+
     
-    usuario_id = sessionF['s_usuario_id']
-    soporte_id = sessionF['s_soporte_id'] 
+    usuario_id = sessionF['ss_usuario_id']
+    soporte_id = sessionF['ss_soporte_id'] 
+    fecha_condicion = sessionF['ss_fecha_condicion']
+    fecha1 = sessionF['ss_fecha1']
+    fecha2 = sessionF['ss_fecha2']
+    fecha_condicion = sessionF['ss_fecha_condicion']
+
+    lista_soportes_buscados = None
     
+    # inicio de la consulta
+    query = "SELECT * FROM soporte WHERE "
+    params = []
+    query_conditions = []
+    end_conditions = []
     
     # busqueda en blanco
-    if usuario_id == '' and soporte_id == '':
-        return redirect(url_for('soporte_admin'))
+    if not usuario_id  and not soporte_id and not fecha1 and not fecha2:
+        return redirect(url_for('soporte_admin'))    
     
-    # busqueda por id de usuario 
-    elif soporte_id == '':
-        lista_soportes_buscados=OrderedDict({soporte.soporte_id:soporte._asdict() for soporte in 
-        session.execute("""
-            SELECT * FROM SOPORTE  
-            WHERE usuario_id = %s 
-            ORDER BY fecha DESC
-            LIMIT 100 
-        """, (UUID(usuario_id), ))}.items())
-    
+    # busqueda por id de usuario     
+    if usuario_id:
+        query_conditions.append("usuario_id = %s")
+        params.append(UUID(usuario_id))
+        end_conditions.append("ORDER BY fecha DESC")  
+
     # busqueda por id de soporte 
-    elif usuario_id == '':
-        lista_soportes_buscados=OrderedDict({soporte.soporte_id:soporte._asdict() for soporte in 
-        session.execute("""
-            SELECT * FROM SOPORTE  
-            WHERE soporte_id = %s ALLOW FILTERING
-        """, (UUID(soporte_id), ))}.items())
+    if soporte_id:
+        query_conditions.append("soporte_id = %s")
+        params.append(UUID(soporte_id))
+
+    # busqueda por una fecha o entre dos fechas 
+    if fecha1:
+        query_conditions.append("fecha " + fecha_condicion + " %s")
+        params.append(datetime.strptime(fecha1 + " 00:00:00.000000" , '%Y-%m-%d %H:%M:%S.%f'))
         
-    # busqueda por id de soporte y usuario
-    else:
-        lista_soportes_buscados=OrderedDict({soporte.soporte_id:soporte._asdict() for soporte in 
-        session.execute("""
-            SELECT * FROM SOPORTE  
-            WHERE soporte_id = %s AND usuario_id = %s 
-            ORDER BY fecha DESC 
-            LIMIT 100 ALLOW FILTERING
-        """, (UUID(soporte_id), UUID(usuario_id)))}.items())
+    if fecha2 and fecha_condicion == '<=':
+        query_conditions.append("fecha >= %s")
+        params.append(datetime.strptime(fecha2 + " 00:00:00.000000", '%Y-%m-%d %H:%M:%S.%f'))
+        
+        
+    end_conditions.append("LIMIT 100")  
+    if soporte_id or fecha1 or fecha2:
+        end_conditions.append("ALLOW FILTERING")  
+        
+        
+    query = query + " AND ".join(query_conditions) + " " + " ".join(end_conditions) 
+    print(query)
+    print(params)
+    
+    lista_soportes_buscados = OrderedDict({soporte.soporte_id: soporte._asdict() for soporte in 
+        session.execute(
+            query, params)}.items())
         
     
     return render_template('soporte_admin.html', usuario=sessionF, soportes=lista_soportes_buscados)
 
 
 if __name__ == '__main__':
-	app.run(host='localhost', port=8080, debug=False)
+	app.run(host='localhost', port=8080, debug=True)

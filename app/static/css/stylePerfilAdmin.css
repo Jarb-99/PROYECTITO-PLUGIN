@@ -4,82 +4,75 @@ body {
     min-height: 100vh;
     margin: 0;
     font-family: 'Arial', sans-serif;
-    background-color: #f8f9fa;
+    background-image: linear-gradient(92deg, #f83600 0%, #f9d423 100%);
+    background-image: url('/static/images/perfilImage.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
 }
 
+
+header.bg-dark,
 header.navbar {
-    position: fixed;
     width: 100%;
     z-index: 1;
-    background-color: #343a40;
     border-bottom: 1px solid #ddd;
+    background: linear-gradient(135deg, #000001, #0D101F);
 }
 
 header.navbar .nav-link {
-    color: #fff !important;
+    color: #fff;
     padding: 10px 15px;
-    transition: background-color 0.3s;
-}
-
-header.navbar .nav-link:hover {
-    background-color: #495057;
+    transition: background-color 0.5s;
     border-radius: 5px;
 }
 
+header.navbar .nav-link:hover {
+    background-color: #f88400;
+    color: #0D101F;
+    border-radius: 5px;
+}
+
+header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.content {
+    flex: 1;
+    margin-top: 70px;
+    padding: 20px;
+}
+
 main.container {
-    margin-top: 80px; /* Adjusted for header overlap */
+    margin-top: 20px;
 }
 
 .card {
     border: none;
     border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     transition: transform 0.3s, box-shadow 0.3s;
 }
 
 .card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 10px #ffffff;
 }
 
-.card-title {
-    color: #343a40;
+.card-title,
+.card h6 {
+    color: #1e293b;
     font-weight: bold;
+    margin-top: 10px;
 }
 
 .card-text {
     color: #6c757d;
 }
 
-.btn-primary {
-    background-color: #007bff;
-    border-color: #007bff;
-    transition: background-color 0.3s, color 0.3s;
-}
-
-.btn-primary:hover {
-    background-color: #0056b3;
-    color: #fff;
-}
-
-.btn-success {
-    background-color: #28a745;
-    border-color: #28a745;
-}
-
-.btn-success:hover {
-    background-color: #218838;
-}
-
-.btn-secondary {
-    background-color: #6c757d;
-    border-color: #6c757d;
-}
-
-.btn-secondary:hover {
-    background-color: #5a6268;
-}
-
-.form-control {
-    margin-bottom: 10px;
+.btn-danger {
+    font-size: x-small;
 }
