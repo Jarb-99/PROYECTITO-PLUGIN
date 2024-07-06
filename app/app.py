@@ -221,8 +221,14 @@ def producto(producto_id):
     return render_template('producto.html', producto=producto, usuario=sessionF, lista_comentarios=lista_comentarios)
 
 
-
-
+@app.route('/producto/<uuid:producto_id>/resp', methods=['POST'])
+def producto_respuesta(producto_id):
+    # para realizar un comentario a un producto
+    #    IMPORTANT     #
+    # validdr si existe el producto al momento de enviar el mensaje 
+    
+    #return redirect(url_for('producto', producto_id=producto_id))
+    pass
 
 
 ##############################################################

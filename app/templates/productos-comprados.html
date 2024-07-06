@@ -26,6 +26,9 @@
                             <a href="{{ url_for('producto', producto_id=compra.producto_id) }}" class="no-link-style">
                                 <div class="card-body">
                                     <h5 class="card-title">{{ compra.nombre }}</h5>
+                                    <!-- insertar seccion para form con botton para poder 'valorar 1-5 estrellas' un producto (si es posible con las formas de estrella) -->
+                                    
+                                    <!-- xd -->
                                     <p class="card-text">Precio: ${{ compra.precio }}</p>
                                     <p class="card-text">Cantidad: {{ compra.cantidad }}</p>
                                     <p class="card-text"><small class="text-muted">Fecha de compra: {{ compra.fecha }}</small></p>
