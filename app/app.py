@@ -223,11 +223,26 @@ def producto(producto_id):
 
 @app.route('/producto/<uuid:producto_id>/resp', methods=['POST'])
 def producto_respuesta(producto_id):
-    # para realizar un comentario a un producto
+    # Para realizar un comentario a un producto
+    
     #    IMPORTANT     #
-    # validdr si existe el producto al momento de enviar el mensaje 
+    # Usar la tabla CMNTRIO_PRDCTO
+    # Validdr si existe el producto al momento de enviar el mensaje 
     
     #return redirect(url_for('producto', producto_id=producto_id))
+    pass
+
+@app.route('/PComprados/val', methods=['POST'])
+def producto_valorar():
+    # Para realizar una valoracion a un producto comprado
+    
+    #    IMPORTANT     #
+    # Usar la tabla VALORAR_PRODUCTO 
+    # Validdr si existe el producto al momento de enviar la valoracion
+    # Realizar el promedio de las valoracion de las estrallas que tiene el producto
+    #   No olvidar que el promedio debe realizar "UPDATE" de la "valoracion" de la tabla PRODUCTO 
+    
+    #return redirect(url_for('PComprados'))
     pass
 
 
